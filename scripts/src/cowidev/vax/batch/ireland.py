@@ -2,6 +2,7 @@ import pandas as pd
 
 from cowidev.utils.web import request_json
 from cowidev.vax.utils.files import load_query
+from cowidev.utils import paths
 
 
 def read(source_protocol: str, source_boosters: str) -> pd.DataFrame:
@@ -85,11 +86,11 @@ def pipeline(df: pd.DataFrame, source: str) -> pd.DataFrame:
     )
 
 
-def main(paths):
+def main():
     source_ref = "https://covid19ireland-geohive.hub.arcgis.com/"
     source_protocol = "https://services-eu1.arcgis.com/z6bHNio59iTqqSUY/arcgis/rest/services/COVID19_Daily_Vaccination/FeatureServer/0/query"
     source_boosters = "https://services-eu1.arcgis.com/z6bHNio59iTqqSUY/arcgis/rest/services/COVID19_HSE_vaccine_booster_dose_daily/FeatureServer/0/query"
-    destination = paths.tmp_vax_out("Ireland")
+    destination = paths.out_vax("Ireland")
     read(source_protocol, source_boosters).pipe(pipeline, source_ref).to_csv(destination, index=False)
 
 

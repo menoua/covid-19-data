@@ -7,6 +7,7 @@ from cowidev.vax.process import process_location
 from cowidev.vax.cmd.utils import get_logger, print_eoe
 from pandas.core.base import DataError
 from pandas.errors import ParserError
+from cowidev.utils import paths
 
 
 logger = get_logger()
@@ -20,7 +21,6 @@ def read_csv(filepath):
 
 
 def main_process_data(
-    paths,
     gsheets_api,
     google_spreadsheet_vax_id: str,
     skip_complete: list = None,
@@ -36,7 +36,7 @@ def main_process_data(
     # Get automated-country data
     logger.info("Getting data from output...")
     automated = gsheet.automated_countries
-    filepaths_auto = [paths.tmp_vax_out(country) for country in automated]
+    filepaths_auto = [paths.out_vax(country) for country in automated]
     df_auto_list = [read_csv(filepath) for filepath in filepaths_auto]
 
     # Concatenate
@@ -44,7 +44,7 @@ def main_process_data(
 
     # Check that no location is present in both manual and automated data
     manual_locations = set([df.location[0] for df in df_manual_list])
-    auto_locations = os.listdir(os.path.join(paths.tmp_vax_out_dir, "main_data"))
+    auto_locations = os.listdir(paths.SCRIPTS.OUTPUT_VAX_MAIN)
     auto_locations = set([loc.replace(".csv", "") for loc in auto_locations])
     common_locations = auto_locations.intersection(manual_locations)
     if len(common_locations) > 0:
@@ -67,12 +67,12 @@ def main_process_data(
             df = _process_location(df)
             vax_valid.append(df)
             # Export
-            df.to_csv(paths.pub_vax_loc(country), index=False)
+            df.to_csv(paths.out_vax(country, public=True), index=False)
             logger.info(f"{country}: SUCCESS ✅")
         else:
             logger.info(f"{country}: SKIPPED 🚧")
     df = pd.concat(vax_valid).sort_values(by=["location", "date"])
-    df.to_csv(paths.tmp_vax_all, index=False)
-    gsheet.metadata.to_csv(paths.tmp_met_all, index=False)
+    df.to_csv(paths.SCRIPTS.TMP_VAX, index=False)
+    gsheet.metadata.to_csv(paths.SCRIPTS.TMP_VAX_META, index=False)
     logger.info("Exported ✅")
     print_eoe()

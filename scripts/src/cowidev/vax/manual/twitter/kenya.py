@@ -9,8 +9,8 @@ from cowidev.vax.manual.twitter.base import TwitterCollectorBase
 
 
 class Kenya(TwitterCollectorBase):
-    def __init__(self, api, paths=None, **kwargs):
-        super().__init__(api=api, username="MOH_Kenya", location="Kenya", add_metrics_nan=True, paths=paths, **kwargs)
+    def __init__(self, api, **kwargs):
+        super().__init__(api=api, username="MOH_Kenya", location="Kenya", add_metrics_nan=True, **kwargs)
 
     def _propose_df(self):
         max_iter = 100
@@ -43,5 +43,5 @@ class Kenya(TwitterCollectorBase):
         return df
 
 
-def main(api, paths):
-    Kenya(api, paths).to_csv()
+def main(api):
+    Kenya(api).to_csv()

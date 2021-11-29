@@ -2,6 +2,7 @@ import pandas as pd
 
 from cowidev.utils.clean import clean_date_series
 from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
 
 
 class Malta:
@@ -79,11 +80,11 @@ class Malta:
             .pipe(make_monotonic)
         )
 
-    def export(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        destination = paths.tmp_vax_out(self.location)
+        destination = paths.out_vax(self.location)
         df.to_csv(destination, index=False)
 
 
-def main(paths):
-    Malta().export(paths)
+def main():
+    Malta().export()

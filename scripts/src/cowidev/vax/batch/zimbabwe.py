@@ -1,6 +1,7 @@
 import pandas as pd
 
 from cowidev.utils.web import request_json
+from cowidev.utils import paths
 
 
 class Zimbabwe:
@@ -59,12 +60,12 @@ class Zimbabwe:
             .pipe(self.enrich_vaccine)
         )
 
-    def to_csv(self, paths):
+    def to_csv(self):
         df = self.read().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
+def main():
     Zimbabwe(
         source_url="https://www.arcgis.com/home/webmap/viewer.html?url=https://services9.arcgis.com/DnERH4rcjw7NU6lv/ArcGIS/rest/services/Vaccine_Distribution_Program/FeatureServer&source=sd",
         location="Zimbabwe",
@@ -73,7 +74,7 @@ def main(paths):
             "first_doses": "people_vaccinated",
             "second_doses": "people_fully_vaccinated",
         },
-    ).to_csv(paths)
+    ).to_csv()
 
 
 if __name__ == "__main__":

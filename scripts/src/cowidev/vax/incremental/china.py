@@ -6,6 +6,7 @@ import pandas as pd
 from cowidev.utils.clean import clean_count, extract_clean_date
 from cowidev.utils.web.scraping import get_driver
 from cowidev.vax.utils.incremental import merge_with_current_data
+from cowidev.utils import paths
 
 
 class China:
@@ -54,8 +55,8 @@ class China:
     def pipeline(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.pipe_metadata).pipe(self.pipe_vaccine)
 
-    def export(self, paths):
-        output_file = paths.tmp_vax_out(self.location)
+    def export(self):
+        output_file = paths.out_vax(self.location)
         last_update = pd.read_csv(output_file).date.max()
         df = self.read(last_update)
         if not df.empty:
@@ -65,5 +66,5 @@ class China:
             df.to_csv(output_file, index=False)
 
 
-def main(paths):
-    China().export(paths)
+def main():
+    China().export()

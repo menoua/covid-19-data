@@ -26,3 +26,7 @@ collated[Country == "Iceland", `Short-term tests per case` := NA]
 # Qatar: the test definition does not match the case definition (confirmed cases does not exclude positive results from tests included in the testing figure)
 collated[Country == "Qatar", `Short-term positive rate` := NA]
 collated[Country == "Qatar", `Short-term tests per case` := NA]
+
+# Norway:  Only those who test positive with the self-tests and who then take a confirmatory PCR test are registered in the MSIS lab database. 
+collated[Country == "Norway", `Short-term positive rate` := NA]
+collated[Country == "Norway", `Short-term tests per case` := NA]

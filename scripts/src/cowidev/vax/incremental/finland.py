@@ -55,14 +55,13 @@ def pipeline(ds: pd.Series) -> pd.Series:
     return ds.pipe(enrich_location).pipe(enrich_vaccine).pipe(enrich_source)
 
 
-def main(paths):
+def main():
     source = (
         "https://sampo.thl.fi/pivot/prod/en/vaccreg/cov19cov/fact_cov19cov.csv?row=cov_vac_dose-533174L&"
         "column=measure-533185.533172.433796.533175&"
     )
     data = read(source).pipe(pipeline)
     increment(
-        paths=paths,
         location=data["location"],
         total_vaccinations=int(data["total_vaccinations"]),
         people_vaccinated=int(data["people_vaccinated"]),

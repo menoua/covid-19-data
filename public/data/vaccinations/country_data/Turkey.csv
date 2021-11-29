@@ -310,3 +310,10 @@ total_vaccinations,date,location,source_url,vaccine,people_vaccinated,people_ful
 119200467,2021-11-19,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56011115,49979995,13209357
 119272284,2021-11-20,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56026218,50012340,13233726
 119327719,2021-11-21,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56038139,50037605,13251975
+119473872,2021-11-22,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56067208,50093635,13313029
+119602103,2021-11-23,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56093801,50144041,13364261
+119726075,2021-11-24,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56119518,50192722,13413835
+119844933,2021-11-25,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56144078,50240356,13460499
+119987705,2021-11-26,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56173117,50298544,13516044
+120058425,2021-11-27,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56188582,50329638,13540205
+120114498,2021-11-28,Turkey,https://covid19asi.saglik.gov.tr/,"Pfizer/BioNTech, Sinovac",56201040,50354168,13559290

@@ -1,8 +1,9 @@
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
 from cowidev.vax.utils.utils import make_monotonic
 from cowidev.utils.web import request_json
+from cowidev.utils import paths
 
 
 class Romania:
@@ -152,23 +153,22 @@ class Romania:
     def pipeline_manufacturer(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.pipe_manufacturer_melt).pipe(self.pipe_manufacturer_cumsum)
 
-    def to_csv(self, paths):
+    def to_csv(self):
         df_base = self.read().pipe(self.pipeline_base)
         # Export data
         df = df_base.copy().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
         # Export manufacturer data
         df = df_base.copy().pipe(self.pipeline_manufacturer)
-        df.to_csv(paths.tmp_vax_out_man(f"{self.location}"), index=False)
-        export_metadata(
+        df.to_csv(paths.out_vax(self.location, manufacturer=True), index=False)
+        export_metadata_manufacturer(
             df,
             "Government of Romania via datelazi.ro",
             self.source_url,
-            paths.tmp_vax_metadata_man,
         )
 
 
-def main(paths):
+def main():
     Romania(
         source_url="https://d35p9e4fm9h3wo.cloudfront.net/latestData.json",
         source_url_ref="https://datelazi.ro/",
@@ -184,7 +184,7 @@ def main(paths):
             "johnson_and_johnson": "Johnson&Johnson",
         },
         vaccines_1d=["johnson_and_johnson"],
-    ).to_csv(paths)
+    ).to_csv()
 
 
 if __name__ == "__main__":

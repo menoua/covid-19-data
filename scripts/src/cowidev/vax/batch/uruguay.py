@@ -1,7 +1,8 @@
 import re
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_age, export_metadata_manufacturer
+from cowidev.utils import paths
 
 
 vaccines_mapping = {
@@ -115,33 +116,31 @@ class Uruguay:
             .sort_values(["location", "date", "age_group_min"])
         )
 
-    def to_csv(self, paths):
+    def to_csv(self):
         # Load data
         df, df_age = self.read()
         # Export main
-        df.pipe(self.pipeline).to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.pipe(self.pipeline).to_csv(paths.out_vax(self.location), index=False)
         # Export manufacturer data
         df_man = df.pipe(self.pipeline_manufacturer)
-        df_man.to_csv(paths.tmp_vax_out_man(self.location), index=False)
-        export_metadata(
+        df_man.to_csv(paths.out_vax(self.location, manufacturer=True), index=False)
+        export_metadata_manufacturer(
             df_man,
             "Ministry of Health via vacuna.uy",
             self.source_url,
-            paths.tmp_vax_metadata_man,
         )
         # Export age data
         df_age = df_age.pipe(self.pipeline_age)
-        df_age.to_csv(paths.tmp_vax_out_by_age_group(self.location), index=False)
-        export_metadata(
+        df_age.to_csv(paths.out_vax(self.location, age=True), index=False)
+        export_metadata_age(
             df_age,
             "Ministry of Health via vacuna.uy",
             self.source_url_age,
-            paths.tmp_vax_metadata_age,
         )
 
 
-def main(paths):
-    Uruguay().to_csv(paths)
+def main():
+    Uruguay().to_csv()
 
 
 if __name__ == "__main__":

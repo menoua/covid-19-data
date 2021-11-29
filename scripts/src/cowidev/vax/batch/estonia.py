@@ -1,4 +1,5 @@
 import pandas as pd
+from cowidev.utils import paths
 
 
 def read(source: str) -> pd.DataFrame:
@@ -51,9 +52,9 @@ def pipeline(df: pd.DataFrame) -> pd.DataFrame:
     return df.pipe(enrich_location).pipe(enrich_vaccine_name).pipe(enrich_source)
 
 
-def main(paths):
+def main():
     source = "https://opendata.digilugu.ee/covid19/vaccination/v2/opendata_covid19_vaccination_total.json"
-    destination = paths.tmp_vax_out("Estonia")
+    destination = paths.out_vax("Estonia")
     read(source).pipe(pipeline).to_csv(destination, index=False)
 
 

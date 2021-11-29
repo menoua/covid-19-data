@@ -7,8 +7,8 @@ from cowidev.vax.manual.twitter.base import TwitterCollectorBase
 
 
 class Nigeria(TwitterCollectorBase):
-    def __init__(self, api, paths=None, **kwargs):
-        super().__init__(api=api, username="NphcdaNG", location="Nigeria", add_metrics_nan=True, paths=paths, **kwargs)
+    def __init__(self, api, **kwargs):
+        super().__init__(api=api, username="NphcdaNG", location="Nigeria", add_metrics_nan=True, **kwargs)
 
     def _propose_df(self):
         regex_1 = (
@@ -68,5 +68,5 @@ class Nigeria(TwitterCollectorBase):
         return df
 
 
-def main(api, paths):
-    Nigeria(api, paths).to_csv()
+def main(api):
+    Nigeria(api).to_csv()

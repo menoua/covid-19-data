@@ -7,15 +7,8 @@ from cowidev.utils.clean import clean_date
 
 
 class Guinea(TwitterCollectorBase):
-    def __init__(self, api, paths=None, **kwargs):
-        super().__init__(
-            api=api,
-            username="anss_guinee",
-            location="Guinea",
-            add_metrics_nan=True,
-            paths=paths,
-            **kwargs
-        )
+    def __init__(self, api, **kwargs):
+        super().__init__(api=api, username="anss_guinee", location="Guinea", add_metrics_nan=True, **kwargs)
 
     def _propose_df(self):
         regex = (
@@ -34,14 +27,12 @@ class Guinea(TwitterCollectorBase):
                         "date": dt,
                         "text": tweet.full_text,
                         "source_url": self.build_post_url(tweet.id),
-                        "media_url": tweet.extended_entities["media"][0][
-                            "media_url_https"
-                        ],
+                        "media_url": tweet.extended_entities["media"][0]["media_url_https"],
                     }
                 )
         df = pd.DataFrame(data)
         return df
 
 
-def main(api, paths):
-    Guinea(api, paths).to_csv()
+def main(api):
+    Guinea(api).to_csv()

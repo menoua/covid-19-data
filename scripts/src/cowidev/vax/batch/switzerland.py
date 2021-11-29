@@ -2,10 +2,11 @@ from datetime import datetime
 
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_age, export_metadata_manufacturer
 from cowidev.utils.web import request_json, get_soup
 from cowidev.utils.clean import clean_date_series
 from cowidev.vax.utils.checks import validate_vaccines
+from cowidev.utils import paths
 
 
 class Switzerland:
@@ -205,38 +206,36 @@ class Switzerland:
             .pipe(self.pipe_age_select_cols)
         )
 
-    def to_csv(self, paths):
+    def export(self):
         locations = ["Switzerland", "Liechtenstein"]
         df, df_manuf, df_age = self.read()
 
         # Main data
         for location in locations:
-            df.pipe(self.pipeline, location).to_csv(paths.tmp_vax_out(location), index=False)
+            df.pipe(self.pipeline, location).to_csv(paths.out_vax(location), index=False)
 
         # Manufacturer
         df_manuf = df_manuf.pipe(self.pipeline_manufacturer)
-        df_manuf.to_csv(paths.tmp_vax_out_man("Switzerland"), index=False)
-        export_metadata(
+        df_manuf.to_csv(paths.out_vax("Switzerland", manufacturer=True), index=False)
+        export_metadata_manufacturer(
             df_manuf,
             "Federal Office of Public Health",
             self.source_url,
-            paths.tmp_vax_metadata_man,
         )
 
         # Age
         for location in locations:
             df_age_ = df_age.pipe(self.pipeline_age, location)
-            df_age_.to_csv(paths.tmp_vax_out_by_age_group(location), index=False)
-            export_metadata(
+            df_age_.to_csv(paths.out_vax(location, age=True), index=False)
+            export_metadata_age(
                 df_age_,
                 "Federal Office of Public Health",
                 self.source_url,
-                paths.tmp_vax_metadata_age,
             )
 
 
-def main(paths):
-    Switzerland().to_csv(paths)
+def main():
+    Switzerland().export()
 
 
 def _get_geo_region(location):

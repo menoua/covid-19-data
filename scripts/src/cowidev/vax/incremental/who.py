@@ -98,7 +98,7 @@ class WHO:
         df.loc[:, "TOTAL_VACCINATIONS"] = df["TOTAL_VACCINATIONS"].fillna(np.nan)
         return df
 
-    def increment_countries(self, df: pd.DataFrame, paths):
+    def increment_countries(self, df: pd.DataFrame):
         for row in df.sort_values("COUNTRY").iterrows():
             row = row[1]
             cond = (
@@ -114,7 +114,6 @@ class WHO:
             )
             if not cond:
                 increment(
-                    paths=paths,
                     location=row["COUNTRY"],
                     total_vaccinations=row["TOTAL_VACCINATIONS"],
                     people_vaccinated=row["PERSONS_VACCINATED_1PLUS_DOSE"],
@@ -136,10 +135,10 @@ class WHO:
             .pipe(self.pipe_calculate_metrics)
         )
 
-    def export(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        self.increment_countries(df, paths)
+        self.increment_countries(df)
 
 
-def main(paths):
-    WHO().export(paths)
+def main():
+    WHO().export()

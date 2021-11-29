@@ -21,4 +21,4 @@ date,people_vaccinated,people_fully_vaccinated,total_vaccinations,location,sourc
 2021-09-28,119996,45074,165070,Papua New Guinea,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Oxford/AstraZeneca
 2021-10-05,133741,61221,194962,Papua New Guinea,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Oxford/AstraZeneca
 2021-10-25,183856,106657,290513,Papua New Guinea,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Oxford/AstraZeneca
-2021-11-07,254708,181283,337131,Papua New Guinea,https://covid19.who.int/,"Johnson&Johnson, Oxford/AstraZeneca, Sinopharm/Beijing"
+2021-11-22,254708,181283,435991,Papua New Guinea,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Oxford/AstraZeneca

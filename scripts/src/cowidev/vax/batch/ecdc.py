@@ -3,8 +3,9 @@ import os
 import pandas as pd
 
 from cowidev.utils.clean.dates import clean_date, localdate
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer, export_metadata_age
 from cowidev.vax.utils.orgs import ECDC_VACCINES
+from cowidev.utils import paths
 
 
 age_groups_known = {
@@ -303,7 +304,7 @@ class ECDC:
             columns=columns,
         )
 
-    def export_age(self, paths, df: pd.DataFrame):
+    def export_age(self, df: pd.DataFrame):
         df_age = df.pipe(self.pipeline_age)
         # Export
         locations = df_age.location.unique()
@@ -311,7 +312,7 @@ class ECDC:
             self._export_country_data(
                 df=df_age,
                 location=location,
-                output_path=paths.tmp_vax_out_by_age_group(location),
+                output_path=paths.out_vax(location, age=True),
                 columns=[
                     "location",
                     "date",
@@ -321,9 +322,13 @@ class ECDC:
                     "people_fully_vaccinated_per_hundred",
                 ],
             )
-        self._export_metadata(df_age, paths.tmp_vax_metadata_age)
+        export_metadata_age(
+            df=df,
+            source_name="European Centre for Disease Prevention and Control (ECDC)",
+            source_url=self.source_url_ref,
+        )
 
-    def export_manufacturer(self, paths, df: pd.DataFrame):
+    def export_manufacturer(self, df: pd.DataFrame):
         df_manufacuter = df.pipe(self.pipeline_manufacturer)
         # Export
         locations = df_manufacuter.location.unique()
@@ -331,27 +336,23 @@ class ECDC:
             self._export_country_data(
                 df=df_manufacuter,
                 location=location,
-                output_path=paths.tmp_vax_out_man(location),
+                output_path=paths.out_vax(location, manufacturer=True),
                 columns=["location", "date", "vaccine", "total_vaccinations"],
             )
-        self._export_metadata(df_manufacuter, paths.tmp_vax_metadata_man)
-
-    def _export_metadata(self, df, output_path):
-        export_metadata(
+        export_metadata_manufacturer(
             df=df,
             source_name="European Centre for Disease Prevention and Control (ECDC)",
             source_url=self.source_url_ref,
-            output_path=output_path,
         )
 
-    def export(self, paths):
+    def export(self):
         # Read data
         df = self.read().pipe(self.pipe_base)
         # Age
-        self.export_age(paths, df)
+        self.export_age(df)
         # Manufacturer
-        self.export_manufacturer(paths, df)
+        self.export_manufacturer(df)
 
 
-def main(paths):
-    ECDC(iso_path=os.path.join(paths.tmp_inp, "iso", "iso.csv")).export(paths)
+def main():
+    ECDC(iso_path=os.path.join(paths.SCRIPTS.INPUT_ISO, "iso.csv")).export()

@@ -8,6 +8,7 @@ import pandas as pd
 
 from cowidev.utils.clean import clean_date
 from cowidev.vax.utils.incremental import merge_with_current_data
+from cowidev.utils import paths
 
 
 class Spain:
@@ -108,8 +109,8 @@ class Spain:
     def pipeline(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.pipe_location)
 
-    def export(self, paths):
-        output_file = paths.tmp_vax_out(self.location)
+    def export(self):
+        output_file = paths.out_vax(self.location)
         last_update = pd.read_csv(output_file).date.astype(str).max()
         df = self.read(last_update)
         if df is not None:
@@ -118,5 +119,5 @@ class Spain:
             df.to_csv(output_file, index=False)
 
 
-def main(paths):
-    Spain().export(paths)
+def main():
+    Spain().export()

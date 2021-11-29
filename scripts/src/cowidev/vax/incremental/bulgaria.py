@@ -54,10 +54,9 @@ class Bulgaria:
             .pipe(self.pipe_source)
         )
 
-    def export(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=int(data["total_vaccinations"]),
             people_fully_vaccinated=int(data["people_fully_vaccinated"]),
@@ -67,5 +66,5 @@ class Bulgaria:
         )
 
 
-def main(paths):
-    Bulgaria().export(paths)
+def main():
+    Bulgaria().export()

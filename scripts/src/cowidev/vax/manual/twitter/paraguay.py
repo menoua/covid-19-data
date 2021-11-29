@@ -7,10 +7,8 @@ from cowidev.vax.manual.twitter.base import TwitterCollectorBase
 
 
 class Paraguay(TwitterCollectorBase):
-    def __init__(self, api, paths=None, **kwargs):
-        super().__init__(
-            api=api, username="msaludpy", location="Paraguay", add_metrics_nan=True, paths=paths, **kwargs
-        )
+    def __init__(self, api, **kwargs):
+        super().__init__(api=api, username="msaludpy", location="Paraguay", add_metrics_nan=True, **kwargs)
 
     def _propose_df(self):
         regex = r"VACUNACIÓN #COVID19 \| Reporte del (\d{1,2}\.\d{1,2}\.202\d) - \d{1,2}:\d{1,2}"
@@ -49,5 +47,5 @@ class Paraguay(TwitterCollectorBase):
         return df
 
 
-def main(api, paths):
-    Paraguay(api, paths).to_csv()
+def main(api):
+    Paraguay(api).to_csv()

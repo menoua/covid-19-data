@@ -1,4 +1,5 @@
 import pandas as pd
+from cowidev.utils import paths
 
 
 class Austria:
@@ -101,10 +102,10 @@ class Austria:
             .sort_values("date")
         )
 
-    def export(self, paths):
-        destination = paths.tmp_vax_out(self.location)
+    def export(self):
+        destination = paths.out_vax(self.location)
         self.read().pipe(self.pipeline).to_csv(destination, index=False)
 
 
-def main(paths):
-    Austria().export(paths)
+def main():
+    Austria().export()

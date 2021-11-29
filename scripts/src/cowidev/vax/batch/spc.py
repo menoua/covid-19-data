@@ -7,6 +7,8 @@ from cowidev.utils.web import request_json
 from cowidev.vax.utils.orgs import SPC_COUNTRIES
 from cowidev.vax.utils.files import load_data
 from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
+
 
 metrics_mapping = {
     "COVIDVACAD1": "people_vaccinated",
@@ -173,20 +175,20 @@ class SPC:
         ]
         return vax_date_mapping
 
-    def to_csv(self, paths):
+    def to_csv(self):
         data = self.read()
         for country, df in data.items():
-            df.to_csv(paths.tmp_vax_out(country), index=False)
+            df.to_csv(paths.out_vax(country), index=False)
 
 
-def main(paths):
+def main():
     country_codes_url = "+".join(SPC_COUNTRIES.keys())
     SPC(
         source_url=(
             f"https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_COVID_VACCINATION,1.0/D.{country_codes_url}.?"
             "startPeriod=2021-02-02&format=jsondata"
         ),
-    ).to_csv(paths)
+    ).to_csv()
 
 
 if __name__ == "__main__":

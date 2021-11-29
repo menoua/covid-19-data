@@ -62,11 +62,10 @@ def pipeline(ds: pd.Series, source: str) -> pd.Series:
     return ds.pipe(enrich_location).pipe(enrich_vaccine).pipe(enrich_source, source)
 
 
-def main(paths):
+def main():
     source = "https://covid19.moph.gov.qa/EN/Pages/Vaccination-Program-Data.aspx"
     data = read(source).pipe(pipeline, source)
     increment(
-        paths=paths,
         location=data["location"],
         total_vaccinations=data["total_vaccinations"],
         # people_vaccinated=data["people_vaccinated"],

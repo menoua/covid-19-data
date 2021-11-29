@@ -68,10 +68,9 @@ class Serbia:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_vaccine).pipe(self.pipe_location)
 
-    def to_csv(self, paths):
+    def to_csv(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             people_vaccinated=data["people_vaccinated"],
@@ -83,8 +82,8 @@ class Serbia:
         )
 
 
-def main(paths):
-    Serbia().to_csv(paths)
+def main():
+    Serbia().to_csv()
 
 
 if __name__ == "__main__":

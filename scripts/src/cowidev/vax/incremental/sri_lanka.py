@@ -108,10 +108,9 @@ class SriLanka:
         )
         return df
 
-    def to_csv(self, paths):
+    def export(self):
         data = self.read()
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             people_vaccinated=data["people_vaccinated"],
@@ -122,8 +121,8 @@ class SriLanka:
         )
 
 
-def main(paths):
-    SriLanka().to_csv(paths)
+def main():
+    SriLanka().export()
 
 
 if __name__ == "__main__":

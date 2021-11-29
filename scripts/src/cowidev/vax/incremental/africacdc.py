@@ -88,9 +88,7 @@ class AfricaCDC:
         df_who = df_who.dropna(subset=["vaccine"])
         df = df.merge(df_who, left_on="ISO_3_CODE", right_on="ISO3")
         df = df.assign(
-            vaccine=df.vaccine.apply(
-                lambda x: ", ".join(sorted(set(WHO_VACCINES[xx.strip()] for xx in x.split(","))))
-            )
+            vaccine=df.vaccine.apply(lambda x: ", ".join(sorted(set(WHO_VACCINES[xx.strip()] for xx in x.split(",")))))
         )
         return df
 
@@ -140,11 +138,10 @@ class AfricaCDC:
             .pipe(self.pipe_exclude_observations)
         )
 
-    def increment_countries(self, df: pd.DataFrame, paths):
+    def increment_countries(self, df: pd.DataFrame):
         for row in df.sort_values("location").iterrows():
             row = row[1]
             increment(
-                paths=paths,
                 location=row["location"],
                 total_vaccinations=row["total_vaccinations"],
                 people_vaccinated=row["people_vaccinated"],
@@ -156,10 +153,10 @@ class AfricaCDC:
             country = row["location"]
             logger.info(f"\tvax.incremental.africacdc.{country}: SUCCESS ✅")
 
-    def export(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        self.increment_countries(df, paths)
+        self.increment_countries(df)
 
 
-def main(paths):
-    AfricaCDC().export(paths)
+def main():
+    AfricaCDC().export()

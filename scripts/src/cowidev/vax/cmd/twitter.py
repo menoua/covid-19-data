@@ -15,11 +15,11 @@ country_to_module = {c: f"cowidev.vax.manual.twitter.{c}" for c in twitter_count
 modules_name = list(country_to_module.values())
 
 
-def _propose_data_country(api, module_name: str, paths: str):
+def _propose_data_country(api, module_name: str):
     logger.info(f"{module_name}: started")
     module = importlib.import_module(module_name)
     try:
-        module.main(api, paths)
+        module.main(api)
     except Exception as err:
         success = False
         logger.error(f"{module_name}: ❌ {err}", exc_info=True)
@@ -30,7 +30,6 @@ def _propose_data_country(api, module_name: str, paths: str):
 
 
 def main_propose_data_twitter(
-    paths,
     consumer_key: str,
     consumer_secret: str,
     parallel: bool = False,
@@ -44,7 +43,6 @@ def main_propose_data_twitter(
             delayed(_propose_data_country)(
                 api,
                 module_name,
-                paths,
             )
             for module_name in modules_name
         )
@@ -55,24 +53,17 @@ def main_propose_data_twitter(
                 _propose_data_country(
                     api,
                     module_name,
-                    paths,
                 )
             )
 
-    modules_failed = [
-        m["module_name"] for m in modules_execution_results if m["success"] is False
-    ]
+    modules_failed = [m["module_name"] for m in modules_execution_results if m["success"] is False]
     # Retry failed modules
     logger.info(f"\n---\n\nRETRIALS ({len(modules_failed)})")
     modules_execution_results = []
     for module_name in modules_failed:
-        modules_execution_results.append(_propose_data_country(api, module_name, paths))
-    modules_failed_retrial = [
-        m["module_name"] for m in modules_execution_results if m["success"] is False
-    ]
+        modules_execution_results.append(_propose_data_country(api, module_name))
+    modules_failed_retrial = [m["module_name"] for m in modules_execution_results if m["success"] is False]
     if len(modules_failed_retrial) > 0:
         failed_str = "\n".join([f"* {m}" for m in modules_failed_retrial])
-        print(
-            f"\n---\n\nThe following scripts failed to run ({len(modules_failed_retrial)}):\n{failed_str}"
-        )
+        print(f"\n---\n\nThe following scripts failed to run ({len(modules_failed_retrial)}):\n{failed_str}")
     print_eoe()

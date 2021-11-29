@@ -36,6 +36,6 @@ def main():
 
     israel.loc[:, "entity"] = "Israel"
     israel.loc[:, "iso_code"] = "ISR"
-    israel.loc[:, "population"] = 8789776
+    israel.loc[:, "population"] = 9291000
 
     return israel

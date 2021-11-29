@@ -165,11 +165,10 @@ class PAHO:
             .pipe(self.pipe_select_out_cols)
         )
 
-    def increment_countries(self, df: pd.DataFrame, paths):
+    def increment_countries(self, df: pd.DataFrame):
         for row in df.sort_values("location").iterrows():
             row = row[1]
             increment(
-                paths=paths,
                 location=row["location"],
                 total_vaccinations=row["total_vaccinations"],
                 people_vaccinated=row["people_vaccinated"],
@@ -182,10 +181,10 @@ class PAHO:
             country = row["location"]
             logger.info(f"\tvax.incremental.paho.{country}: SUCCESS ✅")
 
-    def export(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        self.increment_countries(df, paths)
+        self.increment_countries(df)
 
 
-def main(paths):
-    PAHO().export(paths)
+def main():
+    PAHO().export()

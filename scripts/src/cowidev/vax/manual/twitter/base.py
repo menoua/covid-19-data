@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from cowidev.utils import paths
 
 
 COLUMN_METRICS_ALL = [
@@ -16,7 +17,6 @@ class TwitterCollectorBase:
         username: str,
         location: str,
         add_metrics_nan: bool = False,
-        paths=None,
         output_path=None,
         num_tweets=100,
     ):
@@ -24,19 +24,16 @@ class TwitterCollectorBase:
         self.location = location
         self.tweets = api.get_tweets(self.username, num_tweets)
         self.add_metrics_nan = add_metrics_nan
-        self.paths = paths
+
         self.tweets_relevant = []
-        self.output_path = self._set_output_path(paths, output_path)
+        self.output_path = self._set_output_path(output_path)
         self._data_old = self._get_current_data()
 
-    def _set_output_path(self, paths, output_path):
+    def _set_output_path(self, output_path):
         if output_path is None:
-            if paths is not None:
-                return paths.tmp_vax_out_proposal(self.location)
-            else:
-                raise AttributeError(
-                    "Either specify attribute `paths` or method argument `output_path`"
-                )
+            return paths.out_vax(self.location, proposal=True)
+        else:
+            raise AttributeError("Either specify attribute `paths` or method argument `output_path`")
 
     def _get_current_data(self):
         if os.path.isfile(self.output_path):

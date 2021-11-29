@@ -1,7 +1,5 @@
-import json
-
-import requests
 import pandas as pd
+from cowidev.utils import paths
 
 
 def import_iza():
@@ -42,7 +40,7 @@ def import_iza():
     return iza
 
 
-def main(paths):
+def main():
 
     df = import_iza()
 
@@ -54,7 +52,7 @@ def main(paths):
         df.date >= "2021-02-13", "vaccine"
     ] = "Moderna, Oxford/AstraZeneca, Pfizer/BioNTech, Sputnik V"
 
-    df.to_csv(paths.tmp_vax_out("Slovakia"), index=False)
+    df.to_csv(paths.out_vax("Slovakia"), index=False)
 
 
 if __name__ == "__main__":

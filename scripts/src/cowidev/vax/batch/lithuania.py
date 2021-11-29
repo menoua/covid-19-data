@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 
 from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
 
 
 class Lithuania:
@@ -96,7 +97,7 @@ class Lithuania:
             source_url=self.source_url_ref,
         )
 
-    def export(self, paths):
+    def export(self):
         coverage = (
             self.read(self.source_url_coverage, self.query_params_coverage)
             .pipe(self.pipe_parse_dates)
@@ -113,8 +114,8 @@ class Lithuania:
             .pipe(self.pipe_metadata)
             .pipe(make_monotonic, max_removed_rows=20)
         )
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
-    Lithuania().export(paths)
+def main():
+    Lithuania().export()

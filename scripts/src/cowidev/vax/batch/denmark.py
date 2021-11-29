@@ -10,6 +10,7 @@ import pandas as pd
 from cowidev.utils.clean import clean_date_series
 from cowidev.utils.web.scraping import get_soup
 from cowidev.vax.utils.checks import VACCINES_ONE_DOSE
+from cowidev.utils import paths
 
 
 SEPARATOR = ";"
@@ -47,7 +48,7 @@ class Denmark:
         with tempfile.TemporaryDirectory() as tf:
             # Download and extract
             self._download_data(url, tf)
-            df = self._parse_data(tf)
+            df = self._parse_data(tf, load_boosters=True)
             total_vaccinations_latest = self._parse_total_vaccinations(tf)
             df.loc[df["Vaccinedato"] == df["Vaccinedato"].max(), "total_vaccinations"] = total_vaccinations_latest
         return df
@@ -62,11 +63,30 @@ class Denmark:
         z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(output_path)
 
-    def _parse_data(self, path):
+    def _parse_data(self, path, load_boosters: bool = False):
         df_dose1 = self._load_df_metric(path, "PaabegVacc_daek_DK_prdag.csv", "Kumuleret antal påbegyndt vacc.")
         df_fully = self._load_df_metric(path, "FaerdigVacc_daekning_DK_prdag.csv", "Kumuleret antal færdigvacc.")
         df = df_fully.merge(df_dose1, on="Vaccinedato", how="outer")
+        if load_boosters:
+            df_boosters = self._load_boosters(path, "Revacc1_region_dag.csv")
+            df = pd.merge(df, df_boosters, on="Vaccinedato", how="outer")
         return df.sort_values("Vaccinedato")
+
+    def _load_boosters(self, path, filename: str) -> pd.DataFrame:
+        df = (
+            pd.read_csv(
+                os.path.join(path, "Vaccine_DB", filename),
+                encoding="iso-8859-1",
+                usecols=["Revacc. 1 dato", "Antal revacc. 1"],
+                sep=";",
+            )
+            .rename(columns={"Revacc. 1 dato": "Vaccinedato"})
+            .groupby("Vaccinedato", as_index=False)
+            .sum()
+            .sort_values("Vaccinedato")
+        )
+        df["Antal revacc. 1"] = df["Antal revacc. 1"].cumsum()
+        return df
 
     def _load_df_metric(self, path, filename: str, metric_name: str):
         try:
@@ -133,6 +153,7 @@ class Denmark:
                 "Vaccinedato": "date",
                 "Kumuleret antal færdigvacc.": "people_fully_vaccinated",
                 "Kumuleret antal påbegyndt vacc.": "people_vaccinated",
+                "Antal revacc. 1": "total_boosters",
             }
         )
 
@@ -143,6 +164,7 @@ class Denmark:
         df = df.assign(
             people_vaccinated=df.people_vaccinated.ffill(),
             people_fully_vaccinated=df.people_fully_vaccinated.ffill(),
+            total_boosters=df.total_boosters.ffill(),
         )
         mask = df.date < self.date_limit_one_dose
         df.loc[mask, "total_vaccinations"] = df.loc[mask, "people_vaccinated"] + df.loc[
@@ -150,6 +172,8 @@ class Denmark:
         ].fillna(0)
         # Uncomment to backfill total_vaccinations
         df = df.pipe(self.pipe_total_vax_bfill, n_days=self.num_days_since_launch_single_dose)
+        # Correct total_vaccinations with boosters
+        df.loc[:, "total_vaccinations"] = df["total_vaccinations"] + df["total_boosters"]
         return df
 
     def pipe_vaccine(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -183,9 +207,9 @@ class Denmark:
             .pipe(self.pipe_filter_rows)
         )
 
-    def export(self, paths):
+    def export(self):
         df = self.read()
-        df.pipe(self.pipeline).to_csv(paths.tmp_vax_out("Denmark"), index=False)
+        df.pipe(self.pipeline).to_csv(paths.out_vax(self.location), index=False)
 
     def pipe_total_vax_bfill(self, df: pd.DataFrame, n_days: int) -> pd.DataFrame:
         soup = get_soup(self.source_url_ref)
@@ -213,5 +237,5 @@ class Denmark:
         return df
 
 
-def main(paths):
-    Denmark().export(paths)
+def main():
+    Denmark().export()

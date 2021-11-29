@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from cowidev.utils.clean import clean_date_series, clean_date
 from cowidev.utils.web.scraping import get_soup
 from cowidev.utils.web.download import read_xlsx_from_url
+from cowidev.utils import paths
 
 
 class NewZealand:
@@ -117,12 +118,12 @@ class NewZealand:
             .pipe(self.pipe_postprocess, date_str)
         )
 
-    def export(self, paths):
-        self.read().pipe(self.pipeline).to_csv(paths.tmp_vax_out(self.location), index=False)
+    def export(self):
+        self.read().pipe(self.pipeline).to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
-    NewZealand().export(paths)
+def main():
+    NewZealand().export()
 
 
 if __name__ == "__main__":

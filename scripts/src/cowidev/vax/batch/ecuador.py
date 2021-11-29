@@ -2,8 +2,9 @@ import pandas as pd
 
 from cowidev.utils.clean import clean_date_series
 from cowidev.vax.utils.checks import VACCINES_ONE_DOSE
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
 from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
 
 
 class Ecuador:
@@ -137,30 +138,29 @@ class Ecuador:
         )
         return df
 
-    def to_csv(self, paths):
+    def to_csv(self):
 
         df = self.read(self.source_url).pipe(self.pipeline_base)
 
         # Manufacturer
         df_man = df.pipe(self.pipeline_manufacturer)
-        df_man.to_csv(paths.tmp_vax_out_man(self.location), index=False)
-        export_metadata(
+        df_man.to_csv(paths.out_vax(self.location, manufacturer=True), index=False)
+        export_metadata_manufacturer(
             df_man,
             "Ministerio de Salud Pública del Ecuador (via https://github.com/andrab/ecuacovid)",
             self.source_url_ref,
-            paths.tmp_vax_metadata_man,
         )
 
         # Main data
         df = df.pipe(self.pipeline)
         boosters = self.read(self.source_url_boosters).pipe(self.pipeline_boosters)
         df.merge(boosters, on="date", how="left", validate="one_to_one").to_csv(
-            paths.tmp_vax_out(self.location), index=False
+            paths.out_vax(self.location), index=False
         )
 
 
-def main(paths):
-    Ecuador().to_csv(paths)
+def main():
+    Ecuador().to_csv()
 
 
 if __name__ == "__main__":

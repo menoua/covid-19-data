@@ -6,6 +6,7 @@ import pandas as pd
 from cowidev.utils.clean.dates import localdate
 from cowidev.vax.utils.incremental import enrich_data, increment
 from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
 
 
 def read(source: str) -> pd.Series:
@@ -78,17 +79,14 @@ def pipeline(ds: pd.Series) -> pd.Series:
     return ds.pipe(add_totals).pipe(format_date).pipe(enrich_location).pipe(enrich_vaccine).pipe(enrich_source)
 
 
-def force_monotonic(paths):
-    pd.read_csv(paths.tmp_vax_out("Isle of Man")).pipe(make_monotonic).to_csv(
-        paths.tmp_vax_out("Isle of Man"), index=False
-    )
+def force_monotonic():
+    pd.read_csv(paths.out_vax("Isle of Man")).pipe(make_monotonic).to_csv(paths.out_vax("Isle of Man"), index=False)
 
 
-def main(paths):
+def main():
     source = "https://wabi-west-europe-b-primary-api.analysis.windows.net/public/reports/querydata?synchronous=true"
     data = read(source).pipe(pipeline)
     increment(
-        paths=paths,
         location=data["location"],
         total_vaccinations=data["total_vaccinations"],
         people_vaccinated=data["people_vaccinated"],
@@ -97,7 +95,7 @@ def main(paths):
         source_url=data["source_url"],
         vaccine=data["vaccine"],
     )
-    force_monotonic(paths)
+    force_monotonic()
 
 
 if __name__ == "__main__":

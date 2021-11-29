@@ -1,9 +1,10 @@
 import pandas as pd
 
 from cowidev.utils.web import request_json
+from cowidev.utils import paths
 
 
-def main(paths):
+def main():
 
     url = "https://services6.arcgis.com/bKYAIlQgwHslVRaK/arcgis/rest/services/Vaccination_Individual_Total/FeatureServer/0/query?f=json&cacheHint=true&outFields=*&resultType=standard&returnGeometry=false&spatialRel=esriSpatialRelIntersects&where=1%3D1"
 
@@ -36,7 +37,7 @@ def main(paths):
     # The data contains an error that creates a negative change
     df = df[df.date != "2021-03-03"]
 
-    df.to_csv(paths.tmp_vax_out("Saudi Arabia"), index=False)
+    df.to_csv(paths.out_vax("Saudi Arabia"), index=False)
 
 
 if __name__ == "__main__":

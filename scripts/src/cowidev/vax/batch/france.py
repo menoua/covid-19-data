@@ -1,9 +1,10 @@
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
+from cowidev.utils import paths
 
 
-def main(paths):
+def main():
 
     vaccine_mapping = {
         1: "Pfizer/BioNTech",
@@ -36,8 +37,8 @@ def main(paths):
     df["total_vaccinations"] = df.people_vaccinated + df.people_fully_vaccinated + df.total_boosters
 
     manufacturer = df[["date", "total_vaccinations", "vaccine"]].assign(location="France")
-    manufacturer.to_csv(paths.tmp_vax_out_man("France"), index=False)
-    export_metadata(manufacturer, "Public Health France", source, paths.tmp_vax_metadata_man)
+    manufacturer.to_csv(paths.out_vax("France", manufacturer=True), index=False)
+    export_metadata_manufacturer(manufacturer, "Public Health France", source)
 
     # Infer fully vaccinated for one-dose vaccines
     df.loc[df.vaccine.isin(one_dose_vaccines), "people_fully_vaccinated"] = df.people_vaccinated
@@ -59,7 +60,7 @@ def main(paths):
         ),
     )
 
-    df.to_csv(paths.tmp_vax_out("France"), index=False)
+    df.to_csv(paths.out_vax("France"), index=False)
 
 
 if __name__ == "__main__":

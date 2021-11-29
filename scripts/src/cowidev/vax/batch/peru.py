@@ -1,7 +1,8 @@
 import pandas as pd
 
 from cowidev.utils.clean.dates import localdatenow
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_age
+from cowidev.utils import paths
 
 
 class Peru:
@@ -98,19 +99,18 @@ class Peru:
     def pipeline_age(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.pipe_age_checks).pipe(self.pipe_age_rename_date)
 
-    def export(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
         # Age data
         df_age = self.read_age().pipe(self.pipeline_age)
-        df_age.to_csv(paths.tmp_vax_out_by_age_group(self.location), index=False)
-        export_metadata(
+        df_age.to_csv(paths.out_vax(self.location, age=True), index=False)
+        export_metadata_age(
             df_age,
             "Ministerio de Salud via https://github.com/jmcastagnetto/covid-19-peru-vacunas",
             self.source_url_ref,
-            paths.tmp_vax_metadata_age,
         )
 
 
-def main(paths):
-    Peru().export(paths)
+def main():
+    Peru().export()

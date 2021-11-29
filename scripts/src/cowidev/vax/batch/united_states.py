@@ -4,7 +4,8 @@ import requests
 
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
+from cowidev.utils import paths
 
 
 class UnitedStates:
@@ -73,14 +74,14 @@ class UnitedStates:
 
     ### Manufacturer processing ###
 
-    def read_manufacturer(self, paths) -> pd.DataFrame:
+    def read_manufacturer(self) -> pd.DataFrame:
         vaccine_cols = [
             "Administered_Pfizer",
             "Administered_Moderna",
             "Administered_Janssen",
         ]
         dfs = []
-        for file in glob(os.path.join(paths.in_us_states, "cdc_data_*.csv")):
+        for file in glob(os.path.join(paths.SCRIPTS.INPUT_CDC_VAX, "cdc_data_*.csv")):
             try:
                 df = pd.read_csv(file)
                 for vc in vaccine_cols:
@@ -108,21 +109,20 @@ class UnitedStates:
         df = df.dropna(subset=["total_vaccinations"])
         return df
 
-    def to_csv(self, paths):
-        self.read().pipe(self.pipeline).to_csv(paths.tmp_vax_out("United States"), index=False)
+    def export(self):
+        self.read().pipe(self.pipeline).to_csv(paths.out_vax(self.location), index=False)
 
-        df_manufacturer = self.read_manufacturer(paths)
-        df_manufacturer.to_csv(paths.tmp_vax_out_man(self.location), index=False)
-        export_metadata(
+        df_manufacturer = self.read_manufacturer()
+        df_manufacturer.to_csv(paths.out_vax(self.location, manufacturer=True), index=False)
+        export_metadata_manufacturer(
             df_manufacturer,
             "Centers for Disease Control and Prevention",
             "https://covid.cdc.gov/covid-data-tracker/COVIDData/getAjaxData?id=vaccination_data",
-            paths.tmp_vax_metadata_man,
         )
 
 
-def main(paths):
-    UnitedStates().to_csv(paths)
+def main():
+    UnitedStates().export()
 
 
 if __name__ == "__main__":

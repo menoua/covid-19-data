@@ -39,3 +39,4 @@ date,people_vaccinated,people_fully_vaccinated,total_vaccinations,location,sourc
 2021-11-01,176189,157759,333948,New Caledonia,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Pfizer/BioNTech
 2021-11-08,177450,162552,340002,New Caledonia,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Pfizer/BioNTech
 2021-11-15,178199,164607,342806,New Caledonia,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Pfizer/BioNTech
+2021-11-22,179591,167538,347129,New Caledonia,https://stats.pacificdata.org/vis?tm=covid&pg=0&df[ds]=SPC2&df[id]=DF_COVID_VACCINATION&df[ag]=SPC&df[vs]=1.0,Pfizer/BioNTech

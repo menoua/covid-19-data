@@ -5,6 +5,7 @@ import pandas as pd
 
 from cowidev.vax.utils.utils import make_monotonic
 from cowidev.utils.clean import clean_date
+from cowidev.utils import paths
 
 
 class Australia:
@@ -53,10 +54,10 @@ class Australia:
             .sort_values("date")
         )
 
-    def to_csv(self, paths):
+    def to_csv(self):
         df = self.read().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
-    Australia().to_csv(paths)
+def main():
+    Australia().to_csv()

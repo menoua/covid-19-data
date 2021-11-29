@@ -3,12 +3,13 @@ import json
 import pandas as pd
 
 from cowidev.utils.web.scraping import get_soup
+from cowidev.utils import paths
 
 
 URL = "https://coronadashboard.government.nl/landelijk/vaccinaties"
 
 
-def main(paths):
+def main():
     soup = get_soup(URL)
     script = soup.find("script", id="__NEXT_DATA__")
     data = json.loads(script.string)
@@ -49,7 +50,7 @@ def main(paths):
         | (df.people_vaccinated.isna())
     ]
 
-    df.to_csv(paths.tmp_vax_out("Netherlands"), index=False)
+    df.to_csv(paths.out_vax("Netherlands"), index=False)
 
 
 def enrich_vaccine_name(df: pd.DataFrame) -> pd.DataFrame:

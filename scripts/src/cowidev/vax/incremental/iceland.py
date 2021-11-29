@@ -3,10 +3,11 @@ import json
 
 import pandas as pd
 
-from cowidev.utils.clean import clean_count
+from cowidev.utils.clean import clean_count, clean_date_series
 from cowidev.utils.web import get_soup
 from cowidev.vax.utils.incremental import increment
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
+from cowidev.utils import paths
 
 
 VACCINE_PROTOCOLS = {
@@ -24,7 +25,7 @@ VACCINE_MAPPING = {
 }
 
 
-def main(paths):
+def main():
 
     url = "https://e.infogram.com/c3bc3569-c86d-48a7-9d4c-377928f102bf"
     soup = get_soup(url)
@@ -52,7 +53,6 @@ def main(paths):
     date = json_data["updatedAt"][:10]
 
     increment(
-        paths=paths,
         location="Iceland",
         total_vaccinations=data["total_vaccinations"],
         people_vaccinated=data["people_vaccinated"],
@@ -72,7 +72,7 @@ def main(paths):
 
     df = df.melt("date", var_name="vaccine", value_name="total_vaccinations")
 
-    df["date"] = pd.to_datetime(df["date"], format="%d.%m.%y").astype(str)
+    df["date"] = clean_date_series(df["date"], "%d.%m.%Y")
     df["total_vaccinations"] = pd.to_numeric(df["total_vaccinations"], errors="coerce").fillna(0)
     df["total_vaccinations"] = df.sort_values("date").groupby("vaccine", as_index=False)["total_vaccinations"].cumsum()
     df["location"] = "Iceland"
@@ -82,8 +82,8 @@ def main(paths):
     ), f"Vaccines present in data: {df['vaccine'].unique()}"
     df = df.replace(VACCINE_MAPPING)
 
-    df.to_csv(paths.tmp_vax_out_man("Iceland"), index=False)
-    export_metadata(df, "Ministry of Health", url, paths.tmp_vax_metadata_man)
+    df.to_csv(paths.out_vax("Iceland", manufacturer=True), index=False)
+    export_metadata_manufacturer(df, "Ministry of Health", url)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 import re
-from typing import Dict
 
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
+from cowidev.utils import paths
 
 
 class Germany:
@@ -13,7 +13,6 @@ class Germany:
     columns_rename: str = {
         "dosen_kumulativ": "total_vaccinations",
         "personen_erst_kumulativ": "people_vaccinated",
-        "personen_voll_kumulativ": "people_fully_vaccinated",
         "dosen_dritt_kumulativ": "total_boosters",
     }
     vaccine_mapping: str = {
@@ -21,6 +20,12 @@ class Germany:
         "dosen_moderna_kumulativ": "Moderna",
         "dosen_astra_kumulativ": "Oxford/AstraZeneca",
         "dosen_johnson_kumulativ": "Johnson&Johnson",
+    }
+    fully_vaccinated_mapping: str = {
+        "dosen_biontech_zweit_kumulativ": "full_biontech",
+        "dosen_moderna_zweit_kumulativ": "full_moderna",
+        "dosen_johnson_erst_kumulativ": "full_jj",
+        "dosen_astra_zweit_kumulativ": "full_astra",
     }
     regex_doses_colnames: str = r"dosen_([a-zA-Z]*)_kumulativ"
 
@@ -46,7 +51,10 @@ class Germany:
         return df.rename(columns=self.columns_rename)
 
     def translate_vaccine_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.rename(columns=self.vaccine_mapping)
+        return df.rename(columns=self.vaccine_mapping).rename(columns=self.fully_vaccinated_mapping)
+
+    def calculate_fully_vaccinated(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df.assign(people_fully_vaccinated=df.full_biontech + df.full_moderna + df.full_jj + df.full_astra)
 
     def enrich_location(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.assign(location="Germany")
@@ -56,6 +64,7 @@ class Germany:
             df.pipe(self._check_vaccines)
             .pipe(self.translate_columns)
             .pipe(self.translate_vaccine_columns)
+            .pipe(self.calculate_fully_vaccinated)
             .pipe(self.enrich_location)
         )
 
@@ -107,19 +116,19 @@ class Germany:
     def pipeline_manufacturer(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.melt_manufacturers)
 
-    def to_csv(self, paths):
+    def export(self):
         df_base = self.read().pipe(self.pipeline_base)
         # Export data
         df = df_base.pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
         # Export manufacturer data
         df = df_base.pipe(self.pipeline_manufacturer)
-        df.to_csv(paths.tmp_vax_out_man(self.location), index=False)
-        export_metadata(df, "Robert Koch Institut", self.source_url_ref, paths.tmp_vax_metadata_man)
+        df.to_csv(paths.out_vax(self.location, manufacturer=True), index=False)
+        export_metadata_manufacturer(df, "Robert Koch Institut", self.source_url_ref)
 
 
-def main(paths):
-    Germany().to_csv(paths)
+def main():
+    Germany().export()
 
 
 if __name__ == "__main__":

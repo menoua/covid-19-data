@@ -80,10 +80,9 @@ class ElSalvador:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_location).pipe(self.pipe_vaccine)
 
-    def export(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             people_vaccinated=data["people_vaccinated"],
@@ -95,5 +94,5 @@ class ElSalvador:
         )
 
 
-def main(paths):
-    ElSalvador().export(paths)
+def main():
+    ElSalvador().export()

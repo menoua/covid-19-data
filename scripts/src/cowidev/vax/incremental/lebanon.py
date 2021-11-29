@@ -74,11 +74,10 @@ def pipeline(ds: pd.Series) -> pd.Series:
     return ds.pipe(format_date).pipe(enrich_location).pipe(enrich_vaccine).pipe(enrich_source)
 
 
-def main(paths):
+def main():
     source = "https://impactpublicdashboard.cib.gov.lb/s/public/elasticsearch/vaccine_registration_event_data/_search?rest_total_hits_as_int=true&ignore_unavailable=true&ignore_throttled=true&preference=1635837427794&timeout=30000ms"
     data = read(source).pipe(pipeline)
     increment(
-        paths=paths,
         location=data["location"],
         total_vaccinations=data["total_vaccinations"],
         people_vaccinated=data["people_vaccinated"],

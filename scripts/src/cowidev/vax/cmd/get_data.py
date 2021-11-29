@@ -25,8 +25,7 @@ modules_name = modules_name_batch + modules_name_incremental
 
 
 class CountryDataGetter:
-    def __init__(self, paths: str, skip_countries: list, gsheets_api):
-        self.paths = paths
+    def __init__(self, skip_countries: list, gsheets_api):
         self.skip_countries = skip_countries
         self.gsheets_api = gsheets_api
 
@@ -36,7 +35,7 @@ class CountryDataGetter:
         if country.lower() in self.skip_countries:
             logger.info(f"{module_name}: skipped! ⚠️")
             return {"module_name": module_name, "success": None, "skipped": True, "time": None}
-        args = [self.paths]
+        args = []
         if country == "colombia":
             args.append(self.gsheets_api)
         logger.info(f"{module_name}: started")
@@ -54,7 +53,6 @@ class CountryDataGetter:
 
 
 def main_get_data(
-    paths,
     parallel: bool = False,
     n_jobs: int = -2,
     modules_name: list = modules_name,
@@ -68,7 +66,7 @@ def main_get_data(
     t0 = time.time()
     print("-- Getting data... --")
     skip_countries = [x.lower() for x in skip_countries]
-    country_data_getter = CountryDataGetter(paths, skip_countries, gsheets_api)
+    country_data_getter = CountryDataGetter(skip_countries, gsheets_api)
     if parallel:
         modules_execution_results = Parallel(n_jobs=n_jobs, backend="threading")(
             delayed(country_data_getter.run)(

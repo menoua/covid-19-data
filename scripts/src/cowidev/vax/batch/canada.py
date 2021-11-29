@@ -1,7 +1,7 @@
 import pandas as pd
 
 from cowidev.utils.web import request_json
-from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
 
 
 class Canada:
@@ -61,15 +61,15 @@ class Canada:
         )
         return df
 
-    def export(self, paths):
-        destination = paths.tmp_vax_out(self.location)
-        # self.df_boosters = self._load_current_df(paths)
+    def export(self):
+        destination = paths.out_vax(self.location)
+        # self.df_boosters = self._load_current_df()
         self.read().pipe(self.pipeline).to_csv(destination, index=False)
 
-    # def _load_current_df(self, paths):
-    #     df = pd.read_csv(paths.tmp_vax_out(self.location))
+    # def _load_current_df(self):
+    #     df = pd.read_csv(paths.out_vax(self.location))
     #     return df[["date", "total_boosters"]]
 
 
-def main(paths):
-    Canada().export(paths)
+def main():
+    Canada().export()

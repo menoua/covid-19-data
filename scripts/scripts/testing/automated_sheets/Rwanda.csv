@@ -1,4 +1,9 @@
 Country,Date,Cumulative total,Source URL,Source label,Units,Notes
+Rwanda,2021-11-27,3419396,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,
+Rwanda,2021-11-26,3407331,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,
+Rwanda,2021-11-25,3396990,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,
+Rwanda,2021-11-24,3384204,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,
+Rwanda,2021-11-23,3374997,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,
 Rwanda,2021-11-21,3352613,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,
 Rwanda,2021-11-19,3325694,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,
 Rwanda,2021-11-18,3316146,https://gis.rbc.gov.rw/server/rest/services/Hosted/service_b580a3db9319449e82045881f1667b01/FeatureServer/0/query,Rwanda Ministry of Health,samples tested,

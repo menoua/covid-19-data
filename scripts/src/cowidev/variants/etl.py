@@ -37,6 +37,7 @@ class VariantsETL:
             "21H (Mu)": {"rename": "Mu", "who": True},
             "21I (Delta)": {"rename": "Delta", "who": True},
             "21J (Delta)": {"rename": "Delta", "who": True},
+            "21K (Omicron)": {"rename": "Omicron", "who": True},
             "S:677H.Robin1": {"rename": "S:677H.Robin1", "who": False},
             "S:677P.Pelican": {"rename": "S:677P.Pelican", "who": False},
         }

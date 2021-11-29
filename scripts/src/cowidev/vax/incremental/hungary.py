@@ -6,6 +6,7 @@ import pandas as pd
 from cowidev.utils.clean import clean_count, clean_string, extract_clean_date
 from cowidev.utils.web.scraping import get_soup
 from cowidev.vax.utils.incremental import merge_with_current_data
+from cowidev.utils import paths
 
 
 class Hungary:
@@ -16,9 +17,9 @@ class Hungary:
         self.regex = {
             "title": r"\d+ [millió]+ \d+ [ezer]+ a beoltott, [\d\s]+ az új fertőzött",
             "metrics": (
-                r"A beoltottak száma ([\d\s]+)(?: fő)?, közülük ([\d\s]+) fő már a második oltását is megkapta,"
+                r"A beoltottak száma ([\d\s]+)(?: fő)?, közülük +([\d\s]+) fő már a második oltását is megkapta,"
                 r" ([\d\s(millió)(ezren)]+)"
-                r" pedig már a harmadik oltást is felvették"
+                r" (fő )?pedig már a harmadik oltást is felvették"
             ),
         }
 
@@ -128,9 +129,9 @@ class Hungary:
             .sort_values(by="date")
         )
 
-    def to_csv(self, paths):
+    def export(self):
         """Generalized."""
-        output_file = paths.tmp_vax_out(self.location)
+        output_file = paths.out_vax(self.location)
         last_update = pd.read_csv(output_file).date.max()
         df = self.read(last_update)
         if not df.empty and "people_vaccinated" in df.columns:
@@ -140,8 +141,8 @@ class Hungary:
             df.to_csv(output_file, index=False)
 
 
-def main(paths):
-    Hungary().to_csv(paths)
+def main():
+    Hungary().export()
 
 
 if __name__ == "__main__":

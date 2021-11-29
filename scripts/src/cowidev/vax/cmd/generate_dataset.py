@@ -11,6 +11,7 @@ from shutil import copyfile
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 
+from cowidev.utils import paths
 from cowidev.utils.utils import pd_series_diff_values
 from cowidev.utils.clean import clean_date
 from cowidev.vax.cmd.utils import get_logger
@@ -27,13 +28,12 @@ class Bucket(object):
 
 
 class DatasetGenerator:
-    def __init__(self, inputs, outputs, paths):
+    def __init__(self, inputs, outputs):
         # Inputs
         self.inputs = inputs
         # Outputs
         self.outputs = outputs
         # Others
-        self.paths = paths
         self.aggregates = self.build_aggregates()
         self._countries_covered = None
 
@@ -677,8 +677,8 @@ class DatasetGenerator:
                 raise ValueError("Format not supported. Currently only csv, json and html are accepted!")
 
     def _cp_locations_files(self):
-        copyfile(self.paths.tmp_vax_metadata_man, self.paths.pub_vax_metadata_man)
-        copyfile(self.paths.tmp_vax_metadata_age, self.paths.pub_vax_metadata_age)
+        copyfile(paths.SCRIPTS.OUTPUT_VAX_META_MANUFACT, paths.DATA.VAX_META_MANUFACT)
+        copyfile(paths.SCRIPTS.OUTPUT_VAX_META_AGE, paths.DATA.VAX_META_AGE)
 
     def run(self):
         print("-- Generating dataset... --")
@@ -751,68 +751,66 @@ class DatasetGenerator:
         self._cp_locations_files()
 
 
-def main_generate_dataset(paths):
+def main_generate_dataset():
     # Select columns
     # TODO: Paths might better defined in vax.utils.paths.Paths
     inputs = Bucket(
-        project_dir=paths.project_dir,
-        vaccinations=paths.tmp_vax_all,
-        metadata=paths.tmp_met_all,
-        iso=os.path.join(paths.project_dir, "scripts/input/iso/iso3166_1_alpha_3_codes.csv"),
-        population=os.path.join(paths.project_dir, "scripts/input/un/population_latest.csv"),
-        population_sub=os.path.join(paths.project_dir, "scripts/input/owid/subnational_population_2020.csv"),
-        continent_countries=os.path.join(paths.project_dir, "scripts/input/owid/continents.csv"),
-        eu_countries=os.path.join(paths.project_dir, "scripts/input/owid/eu_countries.csv"),
-        income_groups=os.path.join(paths.project_dir, "scripts/input/wb/income_groups.csv"),
-        income_groups_compl=os.path.join(paths.project_dir, "scripts/input/owid/income_groups_complement.csv"),
+        project_dir=paths.PROJECT_DIR,
+        vaccinations=os.path.join(str(paths.SCRIPTS), "vaccinations.preliminary.csv"),
+        metadata=os.path.join(str(paths.SCRIPTS), "metadata.preliminary.csv"),
+        iso=os.path.join(paths.SCRIPTS.INPUT_ISO, "iso3166_1_alpha_3_codes.csv"),
+        population=os.path.join(paths.SCRIPTS.INPUT_UN, "population_latest.csv"),
+        population_sub=os.path.join(paths.SCRIPTS.INPUT_OWID, "subnational_population_2020.csv"),
+        continent_countries=os.path.join(paths.SCRIPTS.INPUT_OWID, "continents.csv"),
+        eu_countries=os.path.join(paths.SCRIPTS.INPUT_OWID, "eu_countries.csv"),
+        income_groups=os.path.join(paths.SCRIPTS.INPUT_WB, "income_groups.csv"),
+        income_groups_compl=os.path.join(paths.SCRIPTS.INPUT_OWID, "income_groups_complement.csv"),
         manufacturer=os.path.join(
-            paths.project_dir,
-            "scripts/output/vaccinations/by_manufacturer/*.csv",
+            paths.SCRIPTS.OUTPUT_VAX_MANUFACT,
+            "*.csv",
         ),
-        age=os.path.join(paths.project_dir, "scripts/output/vaccinations//by_age_group/*.csv"),
+        age=os.path.join(paths.SCRIPTS.OUTPUT_VAX_AGE, "*.csv"),
     )
     outputs = Bucket(
-        locations=os.path.join(paths.project_dir, "public/data/vaccinations/locations.csv"),
-        automated=os.path.abspath(os.path.join(paths.project_dir, "scripts/output/vaccinations/automation_state.csv")),
-        vaccinations=os.path.abspath(os.path.join(paths.project_dir, "public/data/vaccinations/vaccinations.csv")),
-        vaccinations_json=(
-            os.path.abspath(os.path.join(paths.project_dir, "public/data/vaccinations/vaccinations.json"))
-        ),
+        locations=os.path.join(paths.DATA.VACCINATIONS, "locations.csv"),
+        automated=os.path.abspath(os.path.join(paths.SCRIPTS.OUTPUT_VAX, "automation_state.csv")),
+        vaccinations=os.path.abspath(os.path.join(paths.DATA.VACCINATIONS, "vaccinations.csv")),
+        vaccinations_json=(os.path.abspath(os.path.join(paths.DATA.VACCINATIONS, "vaccinations.json"))),
         manufacturer=(
             os.path.abspath(
                 os.path.join(
-                    paths.project_dir,
-                    "public/data/vaccinations/vaccinations-by-manufacturer.csv",
+                    paths.DATA.VACCINATIONS,
+                    "vaccinations-by-manufacturer.csv",
                 )
             )
         ),
         age=(
             os.path.abspath(
                 os.path.join(
-                    paths.project_dir,
-                    "public/data/vaccinations/vaccinations-by-age-group.csv",
+                    paths.DATA.VACCINATIONS,
+                    "vaccinations-by-age-group.csv",
                 )
             )
         ),
-        grapher=os.path.abspath(os.path.join(paths.project_dir, "scripts/grapher/COVID-19 - Vaccinations.csv")),
+        grapher=os.path.abspath(os.path.join(paths.SCRIPTS.GRAPHER, "COVID-19 - Vaccinations.csv")),
         grapher_manufacturer=os.path.abspath(
             os.path.join(
-                paths.project_dir,
-                "scripts/grapher/COVID-19 - Vaccinations by manufacturer.csv",
+                paths.SCRIPTS.GRAPHER,
+                "COVID-19 - Vaccinations by manufacturer.csv",
             )
         ),
         grapher_age=os.path.abspath(
             os.path.join(
-                paths.project_dir,
-                "scripts/grapher/COVID-19 - Vaccinations by age group.csv",
+                paths.SCRIPTS.GRAPHER,
+                "COVID-19 - Vaccinations by age group.csv",
             )
         ),
-        html_table=os.path.abspath(os.path.join(paths.project_dir, "scripts/output/vaccinations/source_table.html")),
+        html_table=os.path.abspath(os.path.join(paths.SCRIPTS.OUTPUT_VAX, "source_table.html")),
     )
-    generator = DatasetGenerator(inputs, outputs, paths)
+    generator = DatasetGenerator(inputs, outputs)
     generator.run()
 
     # Export timestamp
-    timestamp_filename = os.path.join(paths.pub_tsp, "owid-covid-data-last-updated-timestamp-vaccination.txt")
+    timestamp_filename = os.path.join(paths.DATA.TIMESTAMP, "owid-covid-data-last-updated-timestamp-vaccination.txt")
     with open(timestamp_filename, "w") as timestamp_file:
         timestamp_file.write(datetime.utcnow().replace(microsecond=0).isoformat())

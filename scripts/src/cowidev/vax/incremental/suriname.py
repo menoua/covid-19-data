@@ -52,11 +52,10 @@ def pipeline(ds: pd.Series) -> pd.Series:
     return ds.pipe(enrich_location).pipe(enrich_vaccine).pipe(enrich_source)
 
 
-def main(paths):
+def main():
     source = "https://datastudio.google.com/embed/u/0/reporting/1a7548f9-83d0-4516-8fe6-cacec6a293c4/page/igSUC"
     data = read(source).pipe(pipeline)
     increment(
-        paths=paths,
         location=data["location"],
         total_vaccinations=data["total_vaccinations"],
         people_vaccinated=data["people_vaccinated"],

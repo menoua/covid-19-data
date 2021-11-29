@@ -4,8 +4,9 @@ import json
 import requests
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_age
 from cowidev.utils.clean import clean_date_series
+from cowidev.utils import paths
 
 
 class Israel:
@@ -143,19 +144,18 @@ class Israel:
         ]
         return df
 
-    def export(self, paths):
-        destination = paths.tmp_vax_out(self.location)
+    def export(self):
+        destination = paths.out_vax(self.location)
         self.read().pipe(self.pipeline).to_csv(destination, index=False)
         # Export age data
         df_age = self.read_age().pipe(self.pipeline_age)
-        df_age.to_csv(paths.tmp_vax_out_by_age_group(self.location), index=False)
-        export_metadata(
+        df_age.to_csv(paths.out_vax(self.location, age=True), index=False)
+        export_metadata_age(
             df_age,
             "Ministry of Health via github.com/dancarmoz/israel_moh_covid_dashboard_data",
             self.source_url_age,
-            paths.tmp_vax_metadata_age,
         )
 
 
-def main(paths):
-    Israel().export(paths)
+def main():
+    Israel().export()

@@ -1,10 +1,10 @@
-import datetime
+import requests
 
 import pandas as pd
 
-from cowidev.utils.clean import clean_count
-from cowidev.utils.web.scraping import get_soup
+from cowidev.utils.clean import clean_count, clean_date
 from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
 
 
 class Sweden(object):
@@ -35,26 +35,28 @@ class Sweden(object):
     def pipeline(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.pipe_vaccine).pipe(self.pipe_columns).pipe(self.pipe_out_columns).pipe(make_monotonic)
 
-    def _week_to_date(self, row: int):
-        origin_dates = {
-            2020: "2019-12-29",
-            2021: "2021-01-03",
-            2022: "2022-01-02",
-            2023: "2023-01-01",
-        }
-        origin_date = pd.to_datetime(origin_dates[row["År"]])
-        return origin_date + pd.DateOffset(days=7 * int(row.Vecka))
+    def _read_weekly_data_doses(self, dfs) -> pd.DataFrame:
+        """Read weekly data for number of vaccinations administered."""
+        # DOSES
+        df = dfs["Vaccinationer tidsserie"]
+        # Filter rows and columns of interest
+        df_doses = df.loc[df.Region == "| Sverige |", ["Vecka", "År", "Antal vaccinationer"]]
+        df_doses = df_doses.rename(columns={"Antal vaccinationer": "total_vaccinations"})
+        return df_doses
 
-    def _read_weekly_data(self) -> pd.DataFrame:
-        df = pd.read_excel(self.source_url_weekly, sheet_name="Vaccinerade tidsserie")
-        df = df[df["Region"] == "| Sverige |"][["Vecka", "Antal vaccinerade", "Vaccinationsstatus", "År"]]
-        df = df.pivot_table(
-            values="Antal vaccinerade", index=["Vecka", "År"], columns="Vaccinationsstatus"
-        ).reset_index()
-        df.loc[:, "date"] = df.apply(self._week_to_date, axis=1).dt.date.astype(str)
-        df = (
-            df.drop(columns=["Vecka", "År"])
-            .sort_values("date")
+    def _read_weekly_data_people(self, dfs) -> pd.DataFrame:
+        """Read weekly data for number of vaccinated people."""
+        # PEOPLE VAX
+        df = dfs["Vaccinerade tidsserie"]
+        # Filter rows and columns of interest
+        df_people = df.loc[df.Region == "| Sverige |", ["Vecka", "År", "Antal vaccinerade", "Vaccinationsstatus"]]
+        # Pivot & rename columns
+        cols_wrong = set(df_people.Vaccinationsstatus).difference({"Minst 1 dos", "Minst 2 doser"})
+        if cols_wrong:
+            raise ValueError(f"Unknown columns: {cols_wrong}")
+        df_people = (
+            df_people.pivot(index=["Vecka", "År"], columns="Vaccinationsstatus", values="Antal vaccinerade")
+            .reset_index()
             .rename(
                 columns={
                     "Minst 1 dos": "people_vaccinated",
@@ -62,19 +64,43 @@ class Sweden(object):
                 }
             )
         )
-        df.loc[:, "total_vaccinations"] = df["people_vaccinated"] + df["people_fully_vaccinated"]
+        return df_people
+
+    def _read_weekly_data(self) -> pd.DataFrame:
+        """Read weekly data
+
+        This data is loaded from an excel. It contains very clean (but sparse, i.e. weekly) data.
+        """
+        dfs = pd.read_excel(self.source_url_weekly, sheet_name=None)
+        # Read data
+        df_doses = self._read_weekly_data_doses(dfs)
+        df_people = self._read_weekly_data_people(dfs)
+        # Merge
+        df = df_doses.merge(df_people, on=["År", "Vecka"])
+        # Date
+        ds = df["År"].astype(str) + "-W" + df["Vecka"].astype(str) + "+0"
+        df["date"] = ds.apply(lambda x: clean_date(x, "%Y-W%W+%w"))
+        # Prepare output
+        df = df.drop(columns=["Vecka", "År"]).sort_values("date")
+        print(df)
         return df
 
     def _read_daily_data(self) -> pd.DataFrame:
-        dfs = pd.read_html(self.source_url_daily, encoding="utf-8")
+        """Read daily data (latest) from HTML page."""
+        text = requests.get(self.source_url_daily, verify=False).content
+        dfs = pd.read_html(text, encoding="utf-8")
         df = self._get_df_daily(dfs[1])
         df_doses = self._get_df_doses_daily(dfs[0])
         df = self._merge_tables_daily(df, df_doses)
         return df
 
-    def _read_daily_data_split(self) -> pd.DataFrame:
-        dfs = pd.read_html(self.source_url_daily, encoding="utf-8")
-        df_adults = self._get_df_adults_daily(dfs[1])
+    def _read_daily_data_age_split(self) -> pd.DataFrame:
+        """Read daily data (latest) from HTML page with two tables.
+
+        One table with adult numbers, the other one with teen numbers (12-15 yo)."""
+        text = requests.get(self.source_url_daily, verify=False).content
+        dfs = pd.read_html(text, encoding="utf-8")
+        df_adults = self._get_df_daily(dfs[1])
         df_teens = self._get_df_teens_daily(dfs[2])
         df_doses = self._get_df_doses_daily(dfs[0])
         df = self._merge_tables_daily_split(df_adults, df_teens, df_doses)
@@ -86,19 +112,12 @@ class Sweden(object):
             people_fully_vaccinated=df["Antal vaccinerademed 2 doser"].apply(clean_count),
         )
 
-    def _get_df_adults_daily(self, df):
-        # People vaccinated >18 yo
-        return df.assign(
-            people_vaccinated=df["Antal vaccinerademed minst 1 dos*"].apply(clean_count),
-            people_fully_vaccinated=df["Antal vaccinerademed 2 doser"].apply(clean_count),
-        )
-
     def _get_df_teens_daily(self, df):
-        # People vaccinated < 18 yo
-        df_teens = df.pivot("Datum", "Status", "Antal vaccinerade födda 2003-2005").reset_index()
-        return df_teens.assign(
-            people_vaccinated=df_teens["Minst 1 dos"].apply(clean_count),
-            people_fully_vaccinated=df_teens["2 doser"].apply(clean_count),
+        # People vaccinated < 16 yo
+        # df_teens = df.pivot("Datum", "Status", "Antal vaccinerade födda 2003-2005").reset_index()
+        return df.assign(
+            people_vaccinated=df["Antal vaccinerade med minst 1 dos"].apply(clean_count),
+            # people_fully_vaccinated=df_teens["2 doser"].apply(clean_count),
         )
 
     def _get_df_doses_daily(self, df):
@@ -152,11 +171,11 @@ class Sweden(object):
             ]
         ]
 
-    def export(self, paths):
+    def export(self):
         """Generalized."""
         df = self.read().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
-    Sweden().export(paths)
+def main():
+    Sweden().export()

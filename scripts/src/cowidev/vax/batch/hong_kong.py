@@ -2,7 +2,8 @@ import requests
 import pandas as pd
 
 from cowidev.utils.web import request_json
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
+from cowidev.utils import paths
 
 
 def read(source: str) -> pd.DataFrame:
@@ -50,17 +51,17 @@ def manufacturer_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def main(paths):
+def main():
     source = "https://static.data.gov.hk/covid-vaccine/bar_vaccination_date.json"
     data = read(source).pipe(pipeline)
 
-    destination = paths.tmp_vax_out("Hong Kong")
+    destination = paths.out_vax("Hong Kong")
     data.drop(columns=["total_pfizer", "total_sinovac"]).to_csv(destination, index=False)
 
-    destination = paths.tmp_vax_out_man("Hong Kong")
+    destination = paths.out_vax("Hong Kong", manufacturer=True)
     manufacturer = data.pipe(manufacturer_pipeline)
     manufacturer.to_csv(destination, index=False)
-    export_metadata(manufacturer, "Government of Hong Kong", source, paths.tmp_vax_metadata_man)
+    export_metadata_manufacturer(manufacturer, "Government of Hong Kong", source)
 
 
 if __name__ == "__main__":

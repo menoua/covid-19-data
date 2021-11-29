@@ -1,6 +1,7 @@
 import pandas as pd
 
 from cowidev.vax.utils.utils import build_vaccine_timeline
+from cowidev.utils import paths
 
 
 class Malaysia:
@@ -112,10 +113,10 @@ class Malaysia:
             .pipe(self.pipe_columns_out)
         )
 
-    def export(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
-    Malaysia().export(paths)
+def main():
+    Malaysia().export()

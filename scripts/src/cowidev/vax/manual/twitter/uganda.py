@@ -6,13 +6,12 @@ from cowidev.vax.manual.twitter.base import TwitterCollectorBase
 
 
 class Uganda(TwitterCollectorBase):
-    def __init__(self, api, paths=None):
+    def __init__(self, api):
         super().__init__(
             api=api,
             username="MinofHealthUG",
             location="Uganda",
             add_metrics_nan=True,
-            paths=paths,
         )
 
     def _propose_df(self):
@@ -46,5 +45,5 @@ class Uganda(TwitterCollectorBase):
         return pd.DataFrame(data)
 
 
-def main(api, paths):
-    Uganda(api, paths).to_csv()
+def main(api):
+    Uganda(api).to_csv()

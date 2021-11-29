@@ -93,10 +93,10 @@ class Singapore:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_location).pipe(self.pipe_source).pipe(self.pipe_vaccine)
 
-    def to_csv(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline).to_dict()
-        increment(paths=paths, **data)
+        increment(**data)
 
 
-def main(paths):
-    Singapore().to_csv(paths)
+def main():
+    Singapore().export()

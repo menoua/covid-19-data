@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from bs4 import UnicodeDammit
+from cowidev.utils import paths
 
 
 STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_static"))
@@ -68,6 +69,14 @@ def load_data(data_filename: str, file_ext: str = "csv"):
     else:
         raise ValueError("Only CSV format supported")
     return df
+
+
+def export_metadata_manufacturer(df: pd.DataFrame, source_name: str, source_url: str):
+    export_metadata(df, source_name, source_url, paths.SCRIPTS.OUTPUT_VAX_META_MANUFACT)
+
+
+def export_metadata_age(df: pd.DataFrame, source_name: str, source_url: str):
+    export_metadata(df, source_name, source_url, paths.SCRIPTS.OUTPUT_VAX_META_AGE)
 
 
 def export_metadata(df: pd.DataFrame, source_name: str, source_url: str, output_path: str):

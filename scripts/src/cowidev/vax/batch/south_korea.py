@@ -2,6 +2,8 @@ import pandas as pd
 
 from cowidev.utils.clean import clean_df_columns_multiindex, clean_date_series
 from cowidev.utils.web.download import read_xlsx_from_url
+from cowidev.vax.utils.files import export_metadata_manufacturer
+from cowidev.utils import paths
 
 
 class SouthKorea:
@@ -35,7 +37,17 @@ class SouthKorea:
         columns_lv = dict()
         columns_lv[0] = {"기본 접종", "일자", "전체 누적", "추가 접종"}
         columns_lv[1] = {"모더나 누적", "아스트라제네카 누적", "얀센 누적", "화이자 누적"}
-        columns_lv[2] = {"", "1차", "1차(완료)", "완료", "완료\n(AZ-PF교차미포함)","완료\n(M-Pf 교차 포함)", "완료\n(AZ-PF교차포함)","완료\n(교차미포함)", "추가"}
+        columns_lv[2] = {
+            "",
+            "1차",
+            "1차(완료)",
+            "완료",
+            "완료\n(AZ-PF교차미포함)",
+            "완료\n(M-Pf 교차 포함)",
+            "완료\n(AZ-PF교차포함)",
+            "완료\n(교차미포함)",
+            "추가",
+        }
 
         columns_lv_wrong = {i: df.columns.levels[i].difference(k) for i, k in columns_lv.items()}
 
@@ -59,7 +71,7 @@ class SouthKorea:
         data = {"date": df.loc[:, "일자"]}
         for vax_og, vax_new in self.vaccines_mapping.items():
             primary = df.loc[:, ("기본 접종", vax_og)].sum(axis=1)
-            booster = df.loc[:, ("추가 접종")].get(vax_og)
+            booster = df.loc[:, "추가 접종"].get(vax_og)
             data[vax_new] = primary + (0 if booster is None else booster)
         return pd.DataFrame(data)
 
@@ -132,13 +144,19 @@ class SouthKorea:
             .reset_index(drop=True)
         )
 
-    def export(self, paths):
+    def export(self):
         df = self.read()
         # Main data
-        df.pipe(self.pipeline).to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.pipe(self.pipeline).to_csv(paths.out_vax(self.location), index=False)
         # Vaccination by manufacturer
-        df.pipe(self.pipeline_manufacturer).to_csv(paths.tmp_vax_out_man(self.location), index=False)
+        df_man = df.pipe(self.pipeline_manufacturer)
+        df_man.to_csv(paths.out_vax(self.location, manufacturer=True), index=False)
+        export_metadata_manufacturer(
+            df_man,
+            "Korea Centers for Disease Control and Prevention",
+            self.source_url_ref,
+        )
 
 
-def main(paths):
-    SouthKorea().export(paths)
+def main():
+    SouthKorea().export()

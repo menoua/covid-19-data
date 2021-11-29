@@ -63,12 +63,11 @@ class Colombia:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_location).pipe(self.pipe_vaccine).pipe(self.pipe_source)
 
-    def to_csv(self, paths):
+    def export(self):
         data = self.read()
         if "total_vaccinations" in data:
             data = data.pipe(self.pipeline)
             increment(
-                paths=paths,
                 location=data["location"],
                 total_vaccinations=data["total_vaccinations"],
                 people_vaccinated=data["people_vaccinated"],
@@ -81,5 +80,5 @@ class Colombia:
             print("skipped")
 
 
-def main(paths, gsheets_api):
-    Colombia(gsheets_api=gsheets_api).to_csv(paths)
+def main(gsheets_api):
+    Colombia(gsheets_api=gsheets_api).export()

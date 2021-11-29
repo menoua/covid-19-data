@@ -55,10 +55,9 @@ class Panama:
     def pipeline(self, ds: pd.Series):
         return ds.pipe(self.pipe_metadata)
 
-    def export(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             people_vaccinated=data["people_vaccinated"],
@@ -70,5 +69,5 @@ class Panama:
         )
 
 
-def main(paths):
-    Panama().export(paths)
+def main():
+    Panama().export()

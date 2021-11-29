@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 
 from cowidev.utils.clean import clean_date_series
+from cowidev.utils import paths
 
 
 class Greece:
@@ -55,18 +56,18 @@ class Greece:
     def pipeline(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.pipe_metadata).pipe(self.pipe_vaccine).pipe(self.pipe_date)
 
-    def to_csv(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
+def main():
     Greece(
         source_url="https://www.data.gov.gr/api/v1/query/mdg_emvolio?date_from=2020-12-28",
         source_url_ref="https://www.data.gov.gr/datasets/mdg_emvolio/",
         location="Greece",
         token="b1ef5949bebace574a0d7e58b5cdf4018353121e",
-    ).to_csv(paths)
+    ).export()
 
 
 if __name__ == "__main__":

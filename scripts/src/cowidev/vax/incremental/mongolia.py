@@ -69,11 +69,10 @@ def pipeline(ds: pd.Series) -> pd.Series:
     return ds.pipe(add_totals).pipe(enrich_location).pipe(enrich_source)
 
 
-def main(paths):
+def main():
     source = "https://ikon.mn/api/json/vaccine"
     data = read(source).pipe(pipeline)
     increment(
-        paths=paths,
         location=str(data["location"]),
         total_vaccinations=int(data["total_vaccinations"]),
         people_vaccinated=int(data["people_vaccinated"]),

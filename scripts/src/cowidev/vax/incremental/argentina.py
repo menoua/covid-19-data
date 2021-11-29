@@ -25,7 +25,11 @@ class Argentina:
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
         }
-        query = '{"app":"dashboard","requestId":"Q101","timezone":"","panelId":4,"dashboardId":3,"range":{"raw":{"from":"2020-12-29T03:00:00.000Z","to":"now"}},"timeInfo":"","interval":"6h","intervalMs":21600000,"targets":[{"data":null,"target":"distribucion_aplicacion_utilidad_provincia_tabla_publico","refId":"A","hide":false,"type":"table"}],"maxDataPoints":9999,"scopedVars":{"__from":{"text":"1609210800000","value":"1609210800000"},"__dashboard":{"value":{"name":"Seguimiento vacunaci\xf3n Covid","uid":"8wdHBOsMk"}},"__org":{"value":{"name":"minsal","id":0}},"__interval":{"text":"6h","value":"6h"},"__interval_ms":{"text":"21600000","value":21600000}},"startTime":1637056461969,"rangeRaw":{"from":"2020-12-29T03:00:00.000Z","to":"now"},"adhocFilters":[]}'
+        query = (
+            '{"app":"dashboard","requestId":"Q101","timezone":"","panelId":4,"dashboardId":3,"range":{"raw":{"from":"2020-12-29T03:00:00.000Z","to":"now"}},"timeInfo":"","interval":"6h","intervalMs":21600000,"targets":[{"data":null,"target":"distribucion_aplicacion_utilidad_provincia_tabla_publico","refId":"A","hide":false,"type":"table"}],"maxDataPoints":9999,"scopedVars":{"__from":{"text":"1609210800000","value":"1609210800000"},"__dashboard":{"value":{"name":"Seguimiento'
+            " vacunaci\xf3n"
+            ' Covid","uid":"8wdHBOsMk"}},"__org":{"value":{"name":"minsal","id":0}},"__interval":{"text":"6h","value":"6h"},"__interval_ms":{"text":"21600000","value":21600000}},"startTime":1637056461969,"rangeRaw":{"from":"2020-12-29T03:00:00.000Z","to":"now"},"adhocFilters":[]}'
+        )
 
         json_data = requests.post(self.source_url, headers=headers, data=query).json()
         for row in json_data[0]["rows"]:
@@ -63,10 +67,9 @@ class Argentina:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_date).pipe(self.pipe_location).pipe(self.pipe_source).pipe(self.pipe_vaccines)
 
-    def export(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             people_vaccinated=data["people_vaccinated"],
@@ -78,5 +81,5 @@ class Argentina:
         )
 
 
-def main(paths):
-    Argentina().export(paths)
+def main():
+    Argentina().export()

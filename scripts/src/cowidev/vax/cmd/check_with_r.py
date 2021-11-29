@@ -5,23 +5,24 @@ import json
 import pandas as pd
 
 from cowidev.vax.cmd.generate_dataset import DatasetGenerator, Bucket
+from cowidev.utils import paths
 
 
-def test_check_with_r(paths):
+def test_check_with_r():
     # Run python script
     inputs = Bucket(
-        project_dir=paths.project_dir,
-        vaccinations=paths.tmp_vax_all,
-        metadata=paths.tmp_met_all,
-        iso=os.path.join(paths.project_dir, "scripts/input/iso/iso3166_1_alpha_3_codes.csv"),
-        population=os.path.join(paths.project_dir, "scripts/input/un/population_latest.csv"),
-        population_sub=os.path.join(paths.project_dir, "scripts/input/owid/subnational_population_2020.csv"),
-        continent_countries=os.path.join(paths.project_dir, "scripts/input/owid/continents.csv"),
-        eu_countries=os.path.join(paths.project_dir, "scripts/input/owid/eu_countries.csv"),
-        income_groups=os.path.join(paths.project_dir, "scripts/input/wb/income_groups.csv"),
+        project_dir=paths.PROJECT_DIR,
+        vaccinations=os.path.join(paths.SCRIPTS, "vaccinations.preliminary.csv"),
+        metadata=os.path.join(paths.SCRIPTS, "metadata.preliminary.csv"),
+        iso=os.path.join(paths.SCRIPTS.INPUT_ISO, "iso3166_1_alpha_3_codes.csv"),
+        population=os.path.join(paths.SCRIPTS.INPUT_UN, "population_latest.csv"),
+        population_sub=os.path.join(paths.SCRIPTS.INPUT_OWID, "subnational_population_2020.csv"),
+        continent_countries=os.path.join(paths.SCRIPTS.INPUT_OWID, "continents.csv"),
+        eu_countries=os.path.join(paths.SCRIPTS.INPUT_OWID, "eu_countries.csv"),
+        income_groups=os.path.join(paths.SCRIPTS.INPUT_WB, "income_groups.csv"),
         manufacturer=os.path.join(
-            paths.project_dir,
-            "scripts/scripts/vaccinations/output/by_manufacturer/*.csv",
+            paths.SCRIPTS.OUTPUT_VAX_MANUFACT,
+            "*.csv",
         ),
     )
     with tempfile.TemporaryDirectory() as tmp:
@@ -53,28 +54,24 @@ def test_check_with_r(paths):
 
         # Load R generated files
         # paths
-        locations = os.path.join(paths.project_dir, "public/data/vaccinations/locations.csv")
-        automated = os.path.abspath(
-            os.path.join(paths.project_dir, "scripts/scripts/vaccinations/automation_state.csv")
-        )
-        vaccinations = os.path.abspath(os.path.join(paths.project_dir, "public/data/vaccinations/vaccinations.csv"))
-        vaccinations_json = os.path.abspath(
-            os.path.join(paths.project_dir, "public/data/vaccinations/vaccinations.json")
-        )
+        locations = os.path.join(paths.DATA.VACCINATIONS, "locations.csv")
+        automated = os.path.abspath(os.path.join(paths.DATA.VACCINATIONS, "automation_state.csv"))
+        vaccinations = os.path.abspath(os.path.join(paths.DATA.VACCINATIONS, "vaccinations.csv"))
+        vaccinations_json = os.path.abspath(os.path.join(paths.DATA.VACCINATIONS, "vaccinations.json"))
         manufacturer = os.path.abspath(
             os.path.join(
-                paths.project_dir,
-                "public/data/vaccinations/vaccinations-by-manufacturer.csv",
+                paths.DATA.VACCINATIONS,
+                "vaccinations-by-manufacturer.csv",
             )
         )
-        grapher = os.path.abspath(os.path.join(paths.project_dir, "scripts/grapher/COVID-19 - Vaccinations.csv"))
+        grapher = os.path.abspath(os.path.join(paths.SCRIPTS.GRAPHER, "COVID-19 - Vaccinations.csv"))
         grapher_manufacturer = os.path.abspath(
             os.path.join(
-                paths.project_dir,
-                "scripts/grapher/COVID-19 - Vaccinations by manufacturer.csv",
+                paths.SCRIPTS.GRAPHER,
+                "COVID-19 - Vaccinations by manufacturer.csv",
             )
         )
-        html = os.path.abspath(os.path.join(paths.project_dir, "scripts/scripts/vaccinations/source_table.html"))
+        html = os.path.abspath(os.path.join(paths.SCRIPTS.OLD, "vaccinations", "source_table.html"))
         # load
         loc_r = pd.read_csv(locations)
         aut_r = pd.read_csv(automated)

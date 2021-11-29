@@ -20,7 +20,7 @@ count <- page %>%
 add_snapshot(
     count = count,
     date = date,
-    sheet_name = "Singapore - Swabs tested",
+    sheet_name = "Singapore",
     country = "Singapore",
     units = "samples tested",
     testing_type = "PCR only",

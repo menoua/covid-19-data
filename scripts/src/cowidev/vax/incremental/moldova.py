@@ -49,11 +49,10 @@ def pipeline(ds: pd.Series) -> pd.Series:
     return ds.pipe(format_date).pipe(enrich_location).pipe(enrich_vaccine).pipe(enrich_source)
 
 
-def main(paths):
+def main():
     source = "https://vaccinare.gov.md/"
     data = read(source).pipe(pipeline)
     increment(
-        paths=paths,
         location=data["location"],
         total_vaccinations=data["total_vaccinations"],
         people_fully_vaccinated=data["people_fully_vaccinated"],

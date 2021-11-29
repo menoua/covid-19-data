@@ -9,10 +9,8 @@ from cowidev.utils.clean import clean_date
 
 
 class Gibraltar(TwitterCollectorBase):
-    def __init__(self, api, paths=None, **kwargs):
-        super().__init__(
-            api=api, username="GibraltarGov", location="Gibraltar", add_metrics_nan=True, paths=paths, **kwargs
-        )
+    def __init__(self, api, **kwargs):
+        super().__init__(api=api, username="GibraltarGov", location="Gibraltar", add_metrics_nan=True, **kwargs)
 
     def _propose_df(self):
         max_iter = 50
@@ -47,5 +45,5 @@ class Gibraltar(TwitterCollectorBase):
         return df
 
 
-def main(api, paths):
-    Gibraltar(api, paths).to_csv()
+def main(api):
+    Gibraltar(api).to_csv()

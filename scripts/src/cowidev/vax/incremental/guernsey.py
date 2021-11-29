@@ -43,11 +43,10 @@ class Guernsey:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_location).pipe(self.pipe_vaccine).pipe(self.pipe_source)
 
-    def to_csv(self, paths):
+    def to_csv(self):
         """Generalized."""
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             date=data["date"],
@@ -56,11 +55,11 @@ class Guernsey:
         )
 
 
-def main(paths):
+def main():
     Guernsey(
         source_url="https://covid19.gov.gg/guidance/vaccine/stats",
         location="Guernsey",
-    ).to_csv(paths)
+    ).to_csv()
 
 
 if __name__ == "__main__":

@@ -4,7 +4,8 @@ import re
 
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_age
+from cowidev.utils import paths
 
 
 class Jersey:
@@ -16,9 +17,7 @@ class Jersey:
             location (str): Location name
             columns_rename (dict, optional): Maps original to new names. Defaults to None.
         """
-        self.source_url = (
-            "https://www.gov.je/Datasets/ListOpenData?ListName=COVID19Weekly&clean=true"
-        )
+        self.source_url = "https://www.gov.je/Datasets/ListOpenData?ListName=COVID19Weekly&clean=true"
         self.location = "Jersey"
         self.columns_rename = {
             "Date": "date",
@@ -112,12 +111,8 @@ class Jersey:
 
     def pipe_age_create_groups(self, df: pd.DataFrame) -> pd.DataFrame:
         # Split data in dataframes with first and second doses
-        df1 = df.filter(
-            regex=(r"Date|VaccinationsPercentagePopulationVaccinatedFirstDose.*")
-        )
-        df2 = df.filter(
-            regex=(r"Date|VaccinationsPercentagePopulationVaccinatedSecondDose.*")
-        )
+        df1 = df.filter(regex=r"Date|VaccinationsPercentagePopulationVaccinatedFirstDose.*")
+        df2 = df.filter(regex=r"Date|VaccinationsPercentagePopulationVaccinatedSecondDose.*")
         # Melt dataframes
         df1 = df1.melt(
             id_vars="Date",
@@ -139,9 +134,7 @@ class Jersey:
         return df.rename(columns={"Date": "date"})
 
     def pipe_age_minmax_values(self, df: pd.DataFrame) -> pd.DataFrame:
-        df[["age_group_min", "age_group_max"]] = df.age_group.str.split(
-            "-", expand=True
-        )
+        df[["age_group_min", "age_group_max"]] = df.age_group.str.split("-", expand=True)
         return df
 
     def pipe_metrics_scale_100(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -172,22 +165,20 @@ class Jersey:
             ]
         )
 
-    def to_csv(self, paths):
+    def to_csv(self):
         """Generalized."""
         df_base = self.read()
         # Main data
         df = df_base.pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
         # Age data
         df_age = df_base.pipe(self.pipeline_age)
-        df_age.to_csv(paths.tmp_vax_out_by_age_group(self.location), index=False)
-        export_metadata(
-            df_age, "Government of Jersey", self.source_url, paths.tmp_vax_metadata_age
-        )
+        df_age.to_csv(paths.out_vax(self.location, age=True), index=False)
+        export_metadata_age(df_age, "Government of Jersey", self.source_url)
 
 
-def main(paths):
-    Jersey().to_csv(paths)
+def main():
+    Jersey().to_csv()
 
 
 if __name__ == "__main__":

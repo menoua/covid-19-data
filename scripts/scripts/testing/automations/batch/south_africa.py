@@ -8,7 +8,6 @@ class SouthAfrica:
     source_label: str = "National Institute for Communicable Diseases (NICD)"
     source_url_ref: str = "https://github.com/dsfsi/covid19za"
     notes: str = "Made available by the University of Pretoria on Github"
-    testing_type: str = "PCR only"
 
     def read(self):
         return pd.read_csv(self.source_url, usecols=["YYYYMMDD", "cumulative_tests"], parse_dates=["YYYYMMDD"])

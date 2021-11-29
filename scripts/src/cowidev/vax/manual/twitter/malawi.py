@@ -9,10 +9,8 @@ from cowidev.vax.manual.twitter.base import TwitterCollectorBase
 
 
 class Malawi(TwitterCollectorBase):
-    def __init__(self, api, paths=None, **kwargs):
-        super().__init__(
-            api=api, username="health_malawi", location="Malawi", add_metrics_nan=True, paths=paths, **kwargs
-        )
+    def __init__(self, api, **kwargs):
+        super().__init__(api=api, username="health_malawi", location="Malawi", add_metrics_nan=True, **kwargs)
 
     def _propose_df(self):
         max_iter = 30
@@ -43,5 +41,5 @@ class Malawi(TwitterCollectorBase):
         return df
 
 
-def main(api, paths):
-    Malawi(api, paths).to_csv()
+def main(api):
+    Malawi(api).to_csv()

@@ -7,7 +7,7 @@ from cowidev.utils.clean import clean_count, clean_date
 from cowidev.vax.utils.incremental import increment
 
 
-def main(paths):
+def main():
 
     data = {
         "location": "Guatemala",
@@ -34,7 +34,6 @@ def main(paths):
     data["date"] = clean_date(date, "%d/%m/%Y")
 
     increment(
-        paths=paths,
         location=data["location"],
         total_vaccinations=data["total_vaccinations"],
         people_vaccinated=data["people_vaccinated"],

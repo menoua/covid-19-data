@@ -16,7 +16,7 @@ from cowidev.vax.utils.utils import get_latest_file
 class Brazil:
     def __init__(self) -> None:
         self.location = "Brazil"
-        self.source_url = "https://qsprod.saude.gov.br/extensions/DEMAS_C19_Vacina_V2/DEMAS_C19_Vacina_v2.html"
+        self.source_url = "https://infoms.saude.gov.br/extensions/DEMAS_C19_Vacina_v2/DEMAS_C19_Vacina_v2.html"
         self._download_path = "/tmp"
 
     def read(self) -> pd.Series:
@@ -90,10 +90,9 @@ class Brazil:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_date).pipe(self.pipe_location).pipe(self.pipe_vaccine).pipe(self.pipe_source)
 
-    def export(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             people_vaccinated=data["people_vaccinated"],
@@ -105,5 +104,5 @@ class Brazil:
         )
 
 
-def main(paths):
-    Brazil().export(paths)
+def main():
+    Brazil().export()

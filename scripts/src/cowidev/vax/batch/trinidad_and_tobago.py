@@ -3,6 +3,7 @@ import pandas as pd
 from cowidev.utils.clean import clean_date_series
 from cowidev.utils.web import request_json
 from cowidev.vax.utils.files import load_query, load_data
+from cowidev.utils import paths
 
 
 def read(source: str) -> pd.DataFrame:
@@ -65,13 +66,13 @@ def pipeline(df: pd.DataFrame, source: str) -> pd.DataFrame:
     )
 
 
-def main(paths):
+def main():
     source_ref = "https://experience.arcgis.com/experience/59226cacd2b441c7a939dca13f832112/"
     source = (
         "https://services3.arcgis.com/x3I4DqUw3b3MfTwQ/arcgis/rest/services/service_7a519502598f492a9094fd0ad503cf80/"
         "FeatureServer/0/query"
     )
-    destination = paths.tmp_vax_out("Trinidad and Tobago")
+    destination = paths.out_vax("Trinidad and Tobago")
     read(source).pipe(pipeline, source_ref).to_csv(destination, index=False)
 
 

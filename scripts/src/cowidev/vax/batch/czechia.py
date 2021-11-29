@@ -5,8 +5,9 @@ manufacturers were added, so that we can maintain control over this.
 """
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
 from cowidev.vax.utils.utils import build_vaccine_timeline
+from cowidev.utils import paths
 
 
 vaccine_mapping = {
@@ -154,18 +155,18 @@ def global_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def main(paths):
+def main():
     source = "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani.csv"
 
     base = read(source).pipe(base_pipeline)
 
     # Manufacturer data
     df_man = base.pipe(breakdown_per_vaccine)
-    df_man.to_csv(paths.tmp_vax_out_man("Czechia"), index=False)
-    export_metadata(df_man, "Ministry of Health", source, paths.tmp_vax_metadata_man)
+    df_man.to_csv(paths.out_vax("Czechia", manufacturer=True), index=False)
+    export_metadata_manufacturer(df_man, "Ministry of Health", source)
 
     # Main data
-    base.pipe(global_pipeline).to_csv(paths.tmp_vax_out("Czechia"), index=False)
+    base.pipe(global_pipeline).to_csv(paths.out_vax("Czechia"), index=False)
 
 
 if __name__ == "__main__":

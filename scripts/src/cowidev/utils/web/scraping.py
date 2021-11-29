@@ -41,7 +41,7 @@ def get_soup(
         parser (str, optional): HTML parser. Read https://www.crummy.com/software/BeautifulSoup/bs4/doc/
                                 #installing-a-parser. Defaults to 'lxml'.
         request_method (str, optional): Request method. Options are 'get' and 'post'. Defaults to GET method. For POST
-                                        ßmethod, make sure to specify a header (default one does not work).
+                                        method, make sure to specify a header (default one does not work).
         kwargs (dict): Extra arguments passed to requests.get method. Default values for `headers`, `verify` and
                         `timeout` are used.
     Returns:

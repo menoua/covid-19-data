@@ -1,4 +1,3 @@
-import os
 import re
 from datetime import datetime, timedelta
 
@@ -7,6 +6,7 @@ import pandas as pd
 from cowidev.utils.clean import clean_count, clean_string, clean_date
 from cowidev.utils.web.scraping import get_soup
 from cowidev.vax.utils.incremental import merge_with_current_data
+from cowidev.utils import paths
 
 
 class Vietnam:
@@ -15,7 +15,10 @@ class Vietnam:
     regex: dict = {
         "date": r"Bản tin dịch COVID-19 ngày (\d{1,2}/\d{1,2}) của Bộ",
         "metrics": (
-            r"Trong ngày \d{1,2}/\d{1,2} có [\.\d]+ liều (?:vắc xin phòng|vaccine|vaccine phòng|vaccien phòng) COVID-19 được tiêm(?:.*)?. Như vậy, tổng số liều (?:vắc xin|vaccine|vaccien) đã được tiêm là ([\d\.]+) liều, trong đó tiêm 1 mũi là ([\d\.]+) liều, tiêm mũi 2 là ([\d\.]+) liều"
+            r"Trong ngày \d{1,2}/\d{1,2} có [\.\d]+ liều (?:vắc xin phòng|vaccine|vaccine phòng|vaccien phòng)"
+            r" COVID\-19 được tiêm(?:.*)?\. Như vậy, tổng số liều (?:vắc xin|vaccine|vaccien) đã được tiêm là"
+            r" ([\d\.]+)"
+            r" liều, trong đó tiêm 1 mũi là ([\d\.]+) liều, tiêm mũi 2 là ([\d\.]+)(?:\sliều)?"
         ),
     }
 
@@ -23,8 +26,8 @@ class Vietnam:
         soup = get_soup(self.source_url)
         news_info_all = self._parse_news_info(soup)
         records = []
+        # print(news_info_all)
         for news_info in news_info_all:
-            # print(news_info)
             if news_info["date"] < last_updated:
                 break
             records.append(self._parse_metrics(news_info))
@@ -64,8 +67,8 @@ class Vietnam:
     def pipeline(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.pipe(self.pipe_metadata).pipe(self.pipe_clean_source_url)
 
-    def export(self, paths):
-        output_file = paths.tmp_vax_out(self.location)
+    def export(self):
+        output_file = paths.out_vax(self.location)
         last_update = pd.read_csv(output_file).date.max()
         df = self.read(last_update)
         if df is not None:
@@ -74,8 +77,8 @@ class Vietnam:
             df.to_csv(output_file, index=False)
 
 
-def main(paths):
-    Vietnam().export(paths)
+def main():
+    Vietnam().export()
 
 
 if __name__ == "__main__":

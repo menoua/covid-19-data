@@ -1,6 +1,7 @@
 from cowidev.utils.web import get_driver
 from cowidev.utils.clean import clean_count, clean_date
 from cowidev.vax.utils.incremental import merge_with_current_data
+from cowidev.utils import paths
 
 import re
 import pandas as pd
@@ -80,13 +81,13 @@ class Uzbekistan:
     def pipeline(self, df):
         return df.pipe(self.pipe_metadata).pipe(self.pipe_vaccine)
 
-    def export(self, paths):
-        output_file = paths.tmp_vax_out(self.location)
+    def export(self):
+        output_file = paths.out_vax(self.location)
         last_update = pd.read_csv(output_file).date.max()
         df = self.read(last_update).pipe(self.pipeline)
         df = merge_with_current_data(df, output_file)
         df.to_csv(output_file, index=False)
 
 
-def main(paths):
-    Uzbekistan().export(paths)
+def main():
+    Uzbekistan().export()

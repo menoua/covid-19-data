@@ -45,10 +45,9 @@ class SouthAfrica:
     def pipeline(self, ds: pd.Series) -> pd.Series:
         return ds.pipe(self.pipe_location).pipe(self.pipe_vaccine).pipe(self.pipe_source)
 
-    def to_csv(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=str(data["location"]),
             total_vaccinations=int(data["total_vaccinations"]),
             date=str(data["date"]),
@@ -57,5 +56,5 @@ class SouthAfrica:
         )
 
 
-def main(paths):
-    SouthAfrica().to_csv(paths)
+def main():
+    SouthAfrica().export()

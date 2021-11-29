@@ -51,11 +51,10 @@ def pipeline(ds: pd.Series) -> pd.Series:
     return ds.pipe(enrich_location).pipe(enrich_vaccine).pipe(enrich_source)
 
 
-def main(paths):
+def main():
     source = "https://atlas.jifo.co/api/connectors/520021dc-c292-4903-9cdb-a2467f64ed97"
     data = read(source).pipe(pipeline)
     increment(
-        paths=paths,
         location=str(data["location"]),
         total_vaccinations=int(data["total_vaccinations"]),
         people_vaccinated=int(data["people_vaccinated"]),

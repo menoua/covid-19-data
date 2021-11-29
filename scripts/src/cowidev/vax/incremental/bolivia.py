@@ -136,11 +136,10 @@ class Bolivia:
             .pipe(self.pipe_location)
         )
 
-    def export(self, paths):
+    def export(self):
         """Generalized."""
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=data["location"],
             total_vaccinations=data["total_vaccinations"],
             people_vaccinated=data["people_vaccinated"],
@@ -151,8 +150,8 @@ class Bolivia:
         )
 
 
-def main(paths):
-    Bolivia().export(paths)
+def main():
+    Bolivia().export()
 
 
 if __name__ == "__main__":

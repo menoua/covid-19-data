@@ -1,91 +1,27 @@
-import os
-import time
-
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-
-from cowidev.utils.clean import clean_date_series
+from cowidev.utils import paths
 
 
 class Norway:
     def __init__(self) -> None:
         self.location = "Norway"
-        self.source_url = "https://www.fhi.no/sv/vaksine/koronavaksinasjonsprogrammet/koronavaksinasjonsstatistikk/"
+        self.source_url = "https://raw.githubusercontent.com/folkehelseinstituttet/surveillance_data/master/covid19/data_covid19_sysvak_by_time_location_latest.csv"
+        self.source_url_ref = "https://github.com/folkehelseinstituttet/surveillance_data"
 
     def read(self):
-        # Options for Chrome WebDriver
-        op = Options()
-        op.add_argument("--disable-notifications")
-        op.add_argument("--headless")
-        op.add_experimental_option(
-            "prefs",
-            {
-                "download.prompt_for_download": False,
-                "download.directory_upgrade": True,
-                "safebrowsing.enabled": True,
-            },
-        )
+        return pd.read_csv(self.source_url)
 
-        with webdriver.Chrome(options=op) as driver:
-            driver.implicitly_wait(15)
-            # Setting Chrome to trust downloads
-            driver.command_executor._commands["send_command"] = (
-                "POST",
-                "/session/$sessionId/chromium/send_command",
-            )
-            params = {
-                "cmd": "Page.setDownloadBehavior",
-                "params": {"behavior": "allow", "downloadPath": "."},
-            }
-            _ = driver.execute("send_command", params)
-
-            driver.get(self.source_url)
-            element = driver.find_element_by_class_name("highcharts-exporting-group")
-            time.sleep(2)
-            self._scroll_till_element_middle(driver, element)
-            element.click()
-            time.sleep(2)
-            for item in driver.find_elements_by_class_name("highcharts-menu-item"):
-                if item.text == "Last ned CSV":
-                    self._scroll_till_element_middle(driver, item)
-                    item.click()
-                    time.sleep(2)
-                    break
-
-        df = read_csv_multiple_separators(
-            "./antall-personer-vaksiner.csv",
-            separators=[";", ","],
-            usecols=[
-                "Tid/Dato",
-                "Kumulativt antall personer vaksinert med 1.dose",
-                "Kumulativt antall personer vaksinert med 2.dose",
-            ],
-        )
-        if not len(df) > 10:
-            raise ValueError("Check source data, to few entries to be a timeseries")
-        os.remove("./antall-personer-vaksiner.csv")
-        return df
-
-    def _scroll_till_element_middle(self, driver, element):
-        desired_y = (element.size["height"] / 2) + element.location["y"]
-        current_y = (driver.execute_script("return window.innerHeight") / 2) + driver.execute_script(
-            "return window.pageYOffset"
-        )
-        scroll_y_by = desired_y - current_y
-        driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
+    def pipe_filter_rows(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df[df.granularity_geo == "nation"]
 
     def pipe_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.rename(
+        return df[["date", "cum_n_dose_1", "cum_n_dose_2", "cum_n_dose_3_all"]].rename(
             columns={
-                "Kumulativt antall personer vaksinert med 1.dose": "people_vaccinated",
-                "Kumulativt antall personer vaksinert med 2.dose": "people_fully_vaccinated",
-                "Tid/Dato": "date",
+                "cum_n_dose_1": "people_vaccinated",
+                "cum_n_dose_2": "people_fully_vaccinated",
+                "cum_n_dose_3_all": "total_boosters",
             }
         )
-
-    def pipe_date(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.assign(date=clean_date_series(df.date))
 
     def pipe_vaccine(self, df: pd.DataFrame) -> pd.DataFrame:
         def _enrich_vaccine(date: str):
@@ -101,47 +37,31 @@ class Norway:
         return df.assign(vaccine=df.date.apply(_enrich_vaccine))
 
     def pipe_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.assign(total_vaccinations=df.people_vaccinated + df.people_fully_vaccinated.fillna(0))
+        return df.assign(
+            total_vaccinations=df.people_vaccinated.fillna(0)
+            + df.people_fully_vaccinated.fillna(0)
+            + df.total_boosters.fillna(0)
+        )
 
     def pipe_metadata(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.assign(
-            source_url=self.source_url,
+            source_url=self.source_url_ref,
             location=self.location,
         )
 
     def pipeline(self, df: pd.DataFrame) -> pd.DataFrame:
         return (
-            df.pipe(self.pipe_rename_columns)
-            .pipe(self.pipe_date)
+            df.pipe(self.pipe_filter_rows)
+            .pipe(self.pipe_rename_columns)
             .pipe(self.pipe_vaccine)
             .pipe(self.pipe_metrics)
             .pipe(self.pipe_metadata)
         )
 
-    def export(self, paths):
+    def export(self):
         df = self.read().pipe(self.pipeline)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
-    Norway().export(paths)
-
-
-def read_csv_multiple_separators(filepath: str, separators: list, usecols: list) -> pd.DataFrame:
-    """Read a csv using potential separator candidates.
-
-    Args:
-        filepath (str): Path to file.
-        separators (list): List of potential separator candidates. The file is read with the different candidate
-                        separators. The one that is most likely to be the actual separator is used. Note that the list
-                        is checked in sequentially.
-        usecols (list): Columns to load.
-
-    Returns:
-        pandas.DataFrame: Loaded csv
-    """
-    for sep in separators:
-        df = pd.read_csv(filepath, sep=sep)
-        if df.shape[1] != 1:
-            return df[usecols]
-    raise Exception("Check regional settings and the delimiter of the downloaded CSV file.")
+def main():
+    Norway().export()

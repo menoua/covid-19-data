@@ -43,10 +43,9 @@ class FaeroeIslands:
             .pipe(self.pipe_source)
         )
 
-    def export(self, paths):
+    def export(self):
         data = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=str(data["location"]),
             total_vaccinations=int(data["total_vaccinations"]),
             people_vaccinated=int(data["people_vaccinated"]),
@@ -57,8 +56,8 @@ class FaeroeIslands:
         )
 
 
-def main(paths):
-    FaeroeIslands().export(paths)
+def main():
+    FaeroeIslands().export()
 
 
 if __name__ == "__main__":

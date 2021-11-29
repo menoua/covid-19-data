@@ -72,11 +72,10 @@ class AntiguaBarbuda:
             .pipe(self.pipe_source)
         )
 
-    def to_csv(self, paths):
+    def to_csv(self):
         """Generalized."""
         ds = self.read().pipe(self.pipeline)
         increment(
-            paths=paths,
             location=ds["location"],
             total_vaccinations=ds["total_vaccinations"],
             people_vaccinated=ds["people_vaccinated"],
@@ -87,11 +86,11 @@ class AntiguaBarbuda:
         )
 
 
-def main(paths):
+def main():
     AntiguaBarbuda(
         source_url="https://covid19.gov.ag",
         location="Antigua and Barbuda",
-    ).to_csv(paths)
+    ).to_csv()
 
 
 if __name__ == "__main__":

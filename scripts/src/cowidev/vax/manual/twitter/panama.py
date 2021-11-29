@@ -7,13 +7,12 @@ from cowidev.utils.clean.dates import from_tz_to_tz, clean_date
 
 
 class Panama(TwitterCollectorBase):
-    def __init__(self, api, paths=None):
+    def __init__(self, api):
         super().__init__(
             api=api,
             username="MINSAPma",
             location="Panama",
             add_metrics_nan=True,
-            paths=paths,
         )
 
     def _propose_df(self):
@@ -39,5 +38,5 @@ class Panama(TwitterCollectorBase):
         return df
 
 
-def main(api, paths):
-    Panama(api, paths).to_csv()
+def main(api):
+    Panama(api).to_csv()

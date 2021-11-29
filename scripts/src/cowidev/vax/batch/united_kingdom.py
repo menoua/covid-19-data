@@ -4,6 +4,7 @@ import pandas as pd
 from uk_covid19 import Cov19API
 
 from cowidev.vax.utils.utils import make_monotonic
+from cowidev.utils import paths
 
 
 class UnitedKingdom:
@@ -78,14 +79,12 @@ class UnitedKingdom:
     def _filter_location(self, df: pd.DataFrame, location: str) -> pd.DataFrame:
         return df[df.location == location].assign(location=location)
 
-    def to_csv(self, paths):
+    def to_csv(self):
         df = self.read().pipe(self.pipeline)
         for location in set(df.location):
-            df.pipe(self._filter_location, location).pipe(make_monotonic).to_csv(
-                paths.tmp_vax_out(location), index=False
-            )
+            df.pipe(self._filter_location, location).pipe(make_monotonic).to_csv(paths.out_vax(location), index=False)
 
 
-def main(paths):
+def main():
     locale.setlocale(locale.LC_ALL, "en_GB")
-    UnitedKingdom().to_csv(paths)
+    UnitedKingdom().to_csv()

@@ -6,13 +6,12 @@ from cowidev.utils.clean import clean_date
 
 
 class Gabon(TwitterCollectorBase):
-    def __init__(self, api, paths=None):
+    def __init__(self, api):
         super().__init__(
             api=api,
             username="SanteGOUVGA",
             location="Gabon",
             add_metrics_nan=True,
-            paths=paths,
         )
 
     def _propose_df(self):
@@ -37,5 +36,5 @@ class Gabon(TwitterCollectorBase):
         return pd.DataFrame(data)
 
 
-def main(api, paths):
-    Gabon(api, paths).to_csv()
+def main(api):
+    Gabon(api).to_csv()

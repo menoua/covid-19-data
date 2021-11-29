@@ -1,6 +1,7 @@
 import pandas as pd
 
-from cowidev.vax.utils.files import export_metadata
+from cowidev.vax.utils.files import export_metadata_manufacturer
+from cowidev.utils import paths
 
 
 vaccine_mapping = {
@@ -100,24 +101,23 @@ class Chile:
             .sort_values(["location", "date", "vaccine"])
         )
 
-    def to_csv(self, paths):
+    def to_csv(self):
         # Manufacturer
         df_man = self.read(self.source_url_manufacturer).pipe(self.pipeline_manufacturer)
-        df_man.to_csv(paths.tmp_vax_out_man(self.location), index=False)
-        export_metadata(
+        df_man.to_csv(paths.out_vax(self.location, manufacturer=True), index=False)
+        export_metadata_manufacturer(
             df_man,
             "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
             self.source_url_ref,
-            paths.tmp_vax_metadata_man,
         )
 
         # Main data
         df = self.read(self.source_url_vaccinations).pipe(self.pipeline_vaccinations)
-        df.to_csv(paths.tmp_vax_out(self.location), index=False)
+        df.to_csv(paths.out_vax(self.location), index=False)
 
 
-def main(paths):
-    Chile().to_csv(paths)
+def main():
+    Chile().to_csv()
 
 
 if __name__ == "__main__":
